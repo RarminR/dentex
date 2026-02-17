@@ -689,3 +689,46 @@
 - Full suite: `npm test` -> pass (18 files, 168 tests)
 - LSP diagnostics: clean for `src/test/integration/cross-module-flows.integration.test.ts` and `vitest.config.ts`
 - Evidence: `.sisyphus/evidence/task-24-integration-tests.txt`, `.sisyphus/evidence/task-24-npm-test.txt`, `.sisyphus/evidence/task-24-lsp.txt`
+
+## Task 26: Performance + Build Verification
+
+**Completed:** 2026-02-18
+
+### N+1 Query Audit
+- All list view actions already use efficient single-query patterns (no N+1 found):
+  - `getProducts`: `findMany` + `count` via `Promise.all`
+  - `getClients`: `findMany` with `select` + `count` via `Promise.all`
+  - `getOrders`: `findMany` with `include: { client: true }` + `count` via `Promise.all`
+  - `getClientProfitability`: Single `findMany` with deep nested include
+  - `scoreProducts`: 4 parallel queries via `Promise.all`
+
+### Loading Skeletons
+- Added `loading.tsx` to 5 routes: products, clients, orders, dashboard, offers/[clientId]
+- Used shadcn/ui `Skeleton` component (`animate-pulse` + `rounded-md`)
+- Offer loading includes "Se generează oferta..." message
+- Each skeleton mirrors the actual page layout (header + content structure)
+
+### Performance Benchmark
+- `scoreProducts(50 products, 20 orders) + buildBundle`: ~3ms (target: <3000ms)
+- 5-run average: ~1ms, max: ~2ms
+- Pure computation (mocked Prisma) — DB latency not measured
+- Test generates 50 products with 113 order items across 20 orders
+
+### Build Notes
+- Prisma client regeneration needed before build (`npx prisma generate`) if `@prisma/client-*` module not found
+- Build clean: 0 TypeScript errors, 18 static pages generated
+- All 168 tests pass across 18 test files
+
+### Files Created
+1. `src/app/(dashboard)/products/loading.tsx`
+2. `src/app/(dashboard)/clients/loading.tsx`
+3. `src/app/(dashboard)/orders/loading.tsx`
+4. `src/app/(dashboard)/dashboard/loading.tsx`
+5. `src/app/(dashboard)/offers/[clientId]/loading.tsx`
+6. `src/test/perf/offer-generation.test.ts`
+
+### Verification
+- Build: `npm run build` → exit 0 ✓
+- Tests: 168/168 pass ✓
+- LSP: All 6 new files clean (0 errors) ✓
+- Evidence: `.sisyphus/evidence/task-26-*.txt`

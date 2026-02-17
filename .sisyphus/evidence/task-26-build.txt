@@ -1,0 +1,53 @@
+Task 26: Performance + Build Verification
+==========================================
+
+BUILD: npm run build
+-----
+Exit code: 0
+Next.js 16.1.6 (Turbopack)
+✓ Compiled successfully in 11.6s
+✓ Generating static pages (18/18) in 451.3ms
+
+Routes verified:
+  ƒ /clients, /clients/[id], /clients/new
+  ƒ /dashboard
+  ƒ /offers/[clientId]
+  ƒ /orders, /orders/[id], /orders/new
+  ƒ /products, /products/[id], /products/[id]/edit, /products/new
+  ƒ /reports, /reports/products, /reports/profitability
+  ƒ /settings
+  ○ /login, /orders/import, /products/import
+
+TESTS: npx vitest run src/
+-----
+18 test files, 168 tests — ALL PASS
+Duration: 2.96s
+
+PERFORMANCE BENCHMARK: src/test/perf/offer-generation.test.ts
+-----
+2 tests pass:
+  1) scoreProducts(50 products) + buildBundle: 2.85ms (target: <3000ms) ✓
+  2) 5-run avg: 1.12ms, max: 1.61ms (target avg <1000ms, max <3000ms) ✓
+
+N+1 QUERY AUDIT
+-----
+✓ getProducts: Single findMany + count via Promise.all — no N+1
+✓ getClients: Single findMany with select + count via Promise.all — no N+1
+✓ getOrders: Single findMany with include: { client: true } + count via Promise.all — no N+1
+✓ getClientProfitability: Single findMany with include: { orders: { include: { items: { include: { product: true } } } } } — no N+1
+✓ scoreProducts: 4 parallel queries via Promise.all (client, products, clientOrderItems, globalOrderItems) — no N+1
+✓ getProductPerformance: Single findMany with include: { orderItems: { include: { order } } } — no N+1
+✓ getSlowMovers: Same pattern as getProductPerformance — no N+1
+
+LOADING SKELETONS ADDED
+-----
+✓ src/app/(dashboard)/products/loading.tsx
+✓ src/app/(dashboard)/clients/loading.tsx
+✓ src/app/(dashboard)/orders/loading.tsx
+✓ src/app/(dashboard)/dashboard/loading.tsx
+✓ src/app/(dashboard)/offers/[clientId]/loading.tsx — includes "Se generează oferta..." message
+
+LSP DIAGNOSTICS
+-----
+All 5 loading.tsx files: 0 errors ✓
+Performance test file: 0 errors ✓

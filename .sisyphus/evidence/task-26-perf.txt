@@ -1,0 +1,19 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/arminasgari/dentex[39m
+
+[90mstdout[2m | src/test/perf/offer-generation.test.ts[2m > [22m[2mOffer generation performance benchmark[2m > [22m[2mscores 50 products + builds bundle in under 3000ms
+[22m[39m[PERF] scoreProducts + buildBundle: 2.62ms
+[PERF] Products scored: 50
+[PERF] Bundle size: 6 (4 anchors + 2 upsells)
+[PERF] Client order items: 110 across 20 orders
+
+[90mstdout[2m | src/test/perf/offer-generation.test.ts[2m > [22m[2mOffer generation performance benchmark[2m > [22m[2mhandles large product set without degradation
+[22m[39m[PERF] 5-run avg: 0.63ms, max: 0.91ms
+
+ [32m✓[39m src/test/perf/offer-generation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 04:36:20
+[2m   Duration [22m 822ms[2m (transform 73ms, setup 76ms, import 86ms, tests 10ms, environment 452ms)[22m
+
