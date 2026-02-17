@@ -102,3 +102,10 @@ model Offer {
 
   @@index([clientId])
 }
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON stored as String for SQLite
+  updatedAt DateTime @updatedAt
+}

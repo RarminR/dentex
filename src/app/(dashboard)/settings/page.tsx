@@ -1,13 +1,17 @@
 import { Header } from '@/components/layout/Header'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { RO } from '@/lib/constants/ro'
+import { getEngineConfig } from '@/lib/actions/settings'
+import { SettingsClient } from '@/components/settings/SettingsClient'
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const config = await getEngineConfig()
+
   return (
     <>
       <Header title={RO.settings.title} />
       <PageWrapper>
-        <p className="text-gray-500">În construcție...</p>
+        <SettingsClient initialConfig={config} />
       </PageWrapper>
     </>
   )

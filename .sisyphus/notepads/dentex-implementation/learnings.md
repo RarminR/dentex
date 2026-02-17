@@ -296,3 +296,39 @@
 - Build: `npm run build` → Compiled successfully, /orders/new route listed ✓
 - LSP: All new files clean (0 errors) ✓
 - Evidence: `.sisyphus/evidence/task-11-*.txt`
+
+## Task 19: Settings Page (Account + Offer Engine Config)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- `Setting` model is a key-value store: `key` (unique String) + `value` (JSON as String for SQLite)
+- `getEngineConfig()` falls back to `DEFAULT_ENGINE_CONFIG` when no setting exists in DB
+- `updateEngineConfig()` uses `prisma.setting.upsert` — creates on first save, updates thereafter
+- Weight validation uses `validateWeights()` from `defaults.ts` with ±0.001 floating point tolerance
+- `changePassword()` validates min length (6 chars) before any DB call for early rejection
+- `bcryptjs.compare()` for current password, `bcryptjs.hash(newPassword, 10)` for new
+- Used Unicode escapes for Romanian diacritics in `'use server'` files to avoid encoding issues
+- `{ ...config.weights }` spread needed to pass `ScoringWeights` interface to `{ [key: string]: number }` parameter
+
+### UI Patterns
+- `SettingsClient` is a single `'use client'` component receiving `initialConfig` from server page
+- Live "Total ponderi: X,XX" updates as user types — uses `useMemo` over weights object
+- FeedbackBanner component for inline success/error messages (no toast/Toaster needed)
+- Two Card sections: Account (password change) + Engine Config (weights + bundle params)
+- Weights displayed as number inputs with step=0.01, bundle params as integers
+- Percentage fields (anchorRatio, maxCategoryPercent) show computed `XX%` next to input
+
+### Files Created/Modified
+1. `prisma/schema.prisma` — added Setting model
+2. `prisma/migrations/20260217164252_add_settings/` — migration SQL
+3. `src/lib/actions/settings.ts` — getEngineConfig, updateEngineConfig, changePassword
+4. `src/lib/actions/settings.test.ts` — 11 TDD tests (4 validateWeights + 2 getEngineConfig + 2 updateEngineConfig + 3 changePassword)
+5. `src/components/settings/SettingsClient.tsx` — client-side settings form
+6. `src/app/(dashboard)/settings/page.tsx` — server page (updated from placeholder)
+
+### Verification
+- Tests: 11/11 settings tests pass, 134/140 total (6 pre-existing failures in import/orders.test.ts) ✓
+- Build: `npm run build` → Compiled successfully, /settings route listed ✓
+- LSP: All 4 changed files clean (0 errors) ✓
+- Evidence: `.sisyphus/evidence/task-19-*.txt`
