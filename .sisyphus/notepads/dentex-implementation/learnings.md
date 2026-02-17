@@ -332,3 +332,44 @@
 - Build: `npm run build` → Compiled successfully, /settings route listed ✓
 - LSP: All 4 changed files clean (0 errors) ✓
 - Evidence: `.sisyphus/evidence/task-19-*.txt`
+
+## Task 14: CSV Import — Products
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Used `prisma.product.upsert` for each row — avoids interactive `$transaction` typing issues (Prisma 5.22.0)
+- Batch processing in chunks of 100 rows, individual upserts with try/catch per row for graceful error handling
+- Created/updated detection via `createdAt.getTime() === updatedAt.getTime()` — same timestamps = new record
+- Romanian CSV column mapping: `PRODUCT_CSV_COLUMNS` maps `Preț Vânzare` → `unitPrice`, `Preț Achiziție` → `costPrice`, etc.
+- Zod schema for import uses `.nullable().default(null)` for description (not `.optional()`) to match ProductImportRow type
+- Client-side page reconstructs CSV from validated rows → FormData → server action (same pattern as orders import)
+
+### Architecture
+- `src/lib/import/products.ts` — domain logic: column mapping, Zod schema, parse options, row mapping, upsert processing
+- `src/lib/actions/import.ts` — added `importProducts` server action alongside existing `importOrders`
+- `src/app/(dashboard)/products/import/page.tsx` — `'use client'` page using CsvUploader with result display
+- Separation: parser/validator (generic, Task 12) → products.ts (domain-specific) → import.ts (server action) → page (UI)
+
+### Romanian UI Strings
+- "Importă Produse", "Import reușit"
+- "X importate, Y actualizate, Z erori"
+- "Parțial: X importate, Y actualizate, Z erori"
+- Unicode escapes used for diacritics in JSX: `\u0103` (ă), `\u0219` (ș), `\u021b` (ț)
+
+### Files Created/Modified
+1. `src/lib/import/products.ts` — ProductImportRow type, PRODUCT_CSV_COLUMNS, productImportRowSchema, processProductImport
+2. `src/lib/import/products.test.ts` — 6 TDD tests (create, update, multiple, invalid skip, DB error, column mapping)
+3. `src/lib/actions/import.ts` — added importProducts function (modified)
+4. `src/app/(dashboard)/products/import/page.tsx` — import page with CsvUploader
+
+### Verification
+- Tests: 140/140 pass (6 new product import tests) ✓
+- Build: Compiled successfully, /products/import route listed ✓
+- TypeScript: 0 errors in new files ✓
+- LSP: All new/modified files clean ✓
+- Evidence: `.sisyphus/evidence/task-14-*.txt`
+
+### Environment Note
+- Next.js 16 Turbopack ENOENT race condition on `.next/static/<hash>/_buildManifest.js.tmp.*`
+- Workaround: pre-create `.next/static` with `mkdir -p .next/static && chmod -R 777 .next` before `npm run build`
