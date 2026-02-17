@@ -411,3 +411,254 @@
 - Build: Compiled successfully, /reports/products route listed
 - LSP: All new files clean (0 errors)
 - Evidence: `.sisyphus/evidence/task-17-*.txt`
+
+## Task 15: CSV Import — Orders
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Used plain JS math (parseFloat/multiply) in `orders.ts` instead of `@prisma/client/runtime/library` Decimal — avoids Node.js-only deps that break client-side bundling
+- Prisma Decimal conversion deferred to server action (`import.ts`) where Node.js APIs are available
+- Client matching: trim + lowercase comparison (fuzzy-ish, not exact match)
+- Product matching: exact SKU match
+- Order grouping key: `${clientName}|${orderDate}` — same client + date = same order with multiple items
+- Status mapping supports both English and Romanian: "În așteptare"→PENDING, "Livrată"→DELIVERED, "Anulată"→CANCELLED
+- paidAmount summed across rows in same order group; isPaid = paidSum >= totalAmount
+- Prices from CSV used as historical snapshots — NOT current product prices (as required)
+- Zod v4 `.transform().pipe()` pattern for status normalization and quantity parsing
+
+### Architecture
+- `src/lib/import/orders.ts` — pure logic module (no Prisma, no Node.js deps): parseOrderRows, matchClients, matchProducts, groupOrderRows
+- `src/lib/actions/import.ts` — importOrders server action (Prisma calls, Decimal conversion, revalidatePath)
+- `src/app/(dashboard)/orders/import/page.tsx` — client page using CsvUploader, reconstructs CSV → FormData → server action
+
+### CSV Columns
+`Client, Dată Comandă, Produs SKU, Cantitate, Preț Unitar, Status, Plătit`
+
+### Important Pattern: Client-Side Import from Server Module
+- Client components CANNOT import from `@prisma/client/runtime/library` (build fails with Can't resolve 'async_hooks')
+- Solution: keep shared constants/types in import module, defer Prisma Decimal to `'use server'` files only
+- `ORDER_CSV_COLUMNS` exported from orders.ts (no Prisma import) for use in client page
+
+### Files Created
+1. `src/lib/import/orders.ts` — 5 exports: ORDER_CSV_COLUMNS, parseOrderRows, matchClients, matchProducts, groupOrderRows
+2. `src/lib/import/orders.test.ts` — 24 TDD tests (columns, parsing, status mapping, client matching, product matching, grouping, errors)
+3. `src/lib/actions/import.ts` — importOrders added (importProducts already existed from Task 14)
+4. `src/app/(dashboard)/orders/import/page.tsx` — import page with CsvUploader + result display
+
+### Verification
+- TDD: 24 tests RED → GREEN cycle verified
+- Tests: 140/140 pass (24 new order import tests)
+- Build: Compiled successfully, /orders/import route listed ✓
+- LSP: All new files clean (0 errors) ✓
+- Evidence: `.sisyphus/evidence/task-15-*.txt`
+
+### Environment Note
+- Concurrent parallel agents can interfere with git staging area — git add/commit race conditions possible
+- Next.js 16 Turbopack intermittent ENOENT on _buildManifest.js.tmp — kill stale processes + rm -rf .next before build
+
+## Task 16: Client Profitability Report
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- `getClientProfitability` fetches all active clients with nested `orders.items.product` include
+- Revenue = `sum(orderItem.totalPrice)` per client (uses price snapshot from OrderItem, not Product.unitPrice)
+- Cost = `sum(orderItem.quantity × product.costPrice)` per client
+- Profit = Revenue - Cost; Margin = `(profit / totalRevenue) × 100`
+- Zero revenue → margin 0 (prevents division by zero)
+- All Decimal calculations via Prisma `Decimal` methods (`.plus()`, `.minus()`, `.times()`, `.dividedBy()`)
+- Results returned as `.toFixed(2)` strings — serializable across server/client boundary
+- Sorted by profit descending (post-query in JS, not SQL ORDER BY, because profit is computed)
+
+### Prisma Type Inference Gotcha
+- `Prisma.OrderWhereInput` as external variable breaks `findMany` return type inference → `Parameter 'client' implicitly has an 'any' type`
+- Fix: explicitly type result using `Prisma.ClientGetPayload<{include: ...}>` for the client type
+- Date filter cast: `(orderWhere.orderDate as Record<string, Date>).gte = dateFrom`
+
+### UI Patterns
+- Reports hub at `/reports`: card grid linking to sub-reports
+- Date range filter via URL searchParams: `?range=30|90|365|all`
+- Server page computes `dateFrom` from `range` param, passes to server action
+- `ProfitabilityClient` ('use client') renders DataTable with columns + Select for range
+- "+19% TVA" note displayed as text — values are net (consistent with orders module)
+- Profit column color-coded: emerald for positive, red for negative
+
+### Files Created/Modified
+1. `src/lib/actions/reports.ts` — added `getClientProfitability` (appended to existing stubs)
+2. `src/lib/actions/reports.test.ts` — 10 TDD tests (revenue, cost, profit, margin, zero, sorting, dates, limit, Decimal precision)
+3. `src/components/reports/ProfitabilityClient.tsx` — client component with date range + DataTable
+4. `src/app/(dashboard)/reports/page.tsx` — updated from placeholder to hub with card links
+5. `src/app/(dashboard)/reports/profitability/page.tsx` — server page with date range handling
+
+### Verification
+- TDD: 10 tests RED → GREEN cycle verified
+- Tests: 18/18 reports tests pass (10 profitability + 8 pre-existing)
+- Build: Compiled successfully, /reports and /reports/profitability routes listed
+- LSP: All 5 files clean (0 errors)
+- Evidence: `.sisyphus/evidence/task-16-*.txt`
+
+## Task 18: Dashboard (KPIs, Top Clients, Slow-Movers)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Server component only (no client components needed) — StatCard + shadcn Table/Card render server-side
+- `getDashboardData()` uses `Promise.all` for 7 parallel Prisma queries (current month orders, last month orders, active clients, unpaid orders, clients with orders, products with order items, recent orders)
+- Outstanding payments = sum of `(totalAmount - paidAmount)` for `isPaid: false` orders
+- Revenue/order count change: null when last month has no data (avoids division by zero)
+- Slow movers: 12-month lookback, `salesVelocity = totalUnitsSold / monthsInRange`, sorted ascending, take 5
+- All Decimal arithmetic via `@prisma/client/runtime/library` Decimal — `.plus()`, `.minus()`, `.dividedBy()`, `.times()`
+- Dates serialized as ISO strings from server action (safe across RSC boundary)
+- Status badges inline with Romanian labels from RO constants + color mapping
+
+### Architecture
+- `src/lib/actions/dashboard.ts` — single `getDashboardData()` async export (all interfaces local, not exported)
+- `src/app/(dashboard)/dashboard/page.tsx` — async server component, calls getDashboardData(), renders 4 StatCards + 3 Card sections with Table
+- No DataTable used (no pagination needed) — direct shadcn Table/TableRow/TableCell
+- Status labels/colors defined as module-level constants in page file
+
+### Files Created/Modified
+1. `src/lib/actions/dashboard.ts` — getDashboardData server action (NEW)
+2. `src/app/(dashboard)/dashboard/page.tsx` — replaced placeholder with real dashboard (MODIFIED)
+
+### Verification
+- Build: `npm run build` → Compiled successfully, /dashboard route listed as ƒ (dynamic)
+- LSP: Both files clean (0 errors)
+- Evidence: `.sisyphus/evidence/task-18-build.txt`
+- Commit: `d9a4199 feat: add dashboard with KPIs, top clients, and slow-movers`
+
+## Task 20: Offer Engine - Scorer (Rule-Based Algorithm)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- `scoreProducts(clientId, config)` fetches four datasets in parallel: client discount, active products, client order items in timeframe, and all global order items
+- Normalization follows max-based formula with zero-safe fallback: if max is 0, normalized score is 0 (prevents division-by-zero)
+- `clientFrequency` counts order-item occurrences per product (times ordered), while `globalPopularity` sums sold units (`quantity`) per product
+- `recency` uses `max(0, 1 - daysSinceLastOrder / scoringTimeframeDays)` from the latest client order date per product
+- `slowMoverPush` is computed as `1 - globalPopularity` (already normalized because popularity is normalized)
+- `effectivePrice` uses Decimal-safe `applyDiscount(unitPrice, client.discountPercent)` (no float math)
+
+### Implementation Notes
+- Added `src/lib/engine/scorer.ts` and exported `scoreProducts` from `src/lib/engine/index.ts`
+- Returned `ScoredProduct[]` includes all required fields: composite score, full score breakdown, `role: 'anchor'`, and deterministic `suggestedQuantity` (avg historical qty rounded, fallback 1)
+- Margin score is normalized 0-1 for scoring; `marginPercent` remains Decimal percentage (0-100) for output model compatibility
+
+### TDD Coverage
+- RED verified first: scorer test suite failed because `./scorer` did not exist
+- GREEN coverage includes:
+  - frequently ordered product gets higher `clientFrequency`
+  - globally popular product gets higher `globalPopularity`
+  - client with zero orders gets `clientFrequency=0` and `recency=0` for all products
+  - unsold/new product gets `globalPopularity=0` and `slowMoverPush=1`
+  - scores are bounded 0-1, include all 5 breakdown fields, and output is sorted descending by `compositeScore`
+
+### Verification
+- Focused tests: `npm test src/lib/engine/scorer.test.ts` -> 5/5 pass
+- Full suite: `npm test` -> 145/145 pass
+- LSP diagnostics: clean for `scorer.ts`, `scorer.test.ts`, `engine/index.ts`
+
+## Task 21: Offer Engine - Bundler (Anchor/Upsell Selection)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- `buildBundle` computes `bundleSize` from `clientAvgOrderSize` with `round + clamp`; new clients (`0`) start at `minBundleSize`
+- Anchor/upsell split is deterministic: `anchorCount = round(bundleSize * anchorRatio)`, `upsellCount = bundleSize - anchorCount`
+- Anchor ranking uses `clientFrequency + globalPopularity`; upsell ranking uses `slowMoverPush + margin`
+- Tie-break order for deterministic selection: affinity desc, compositeScore desc, productId asc
+- Category diversity enforced at selection time with strict cap: reject any product where `(categoryCount + 1) > (maxCategoryPercent * bundleSize)`
+- `totalValue` uses Decimal-safe `sumDecimals(effectivePrice[])`; `totalMargin` is value-weighted average: `sum(marginPercent * effectivePrice) / totalValue`
+
+### Files Created/Modified
+1. `src/lib/engine/bundler.ts` — `buildBundle` implementation
+2. `src/lib/engine/bundler.test.ts` — TDD coverage for split, size, diversity, totals, roles
+3. `src/lib/engine/index.ts` — exported `scoreProducts` and `buildBundle`
+
+### Verification
+- RED: `npm test src/lib/engine/bundler.test.ts` failed initially (`Cannot find module './bundler'`)
+- GREEN: `npm test src/lib/engine/bundler.test.ts` -> 5/5 pass
+- Full suite: `npm test` -> 150/150 pass
+- LSP diagnostics: clean for `bundler.ts`, `bundler.test.ts`, `engine/index.ts`
+
+## Task 22: AI Enhancer (GPT-4o-mini Romanian Insights)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Implemented `enhanceOffer(offer, clientProfile)` in `src/lib/engine/ai-enhancer.ts` with strict graceful degradation (`null` on any failure path)
+- Prompt includes only compact summaries (client + selected bundle items), never full catalog data
+- Client summary fields: company name, top 3 categories ordered, derived order frequency label from `orderCount`, derived discount tier from `discountPercent`
+- Bundle summary includes both anchor and upsell lists as `productId: name (category)` to support optional swap suggestions
+- Timeout implemented with `Promise.race` at 10 seconds via `withTimeout` helper; timeout logs error and returns null
+- Zod schema validates JSON shape (`insight`, `pitchNote`, optional `swapSuggestions[]`) after parsing `response.output_text`
+- OpenAI token usage logged via `console.log('[AI] tokens used:', response.usage.total_tokens)` when available
+
+### TDD Notes
+- RED verified first: `ai-enhancer.test.ts` failed because `./ai-enhancer` did not exist
+- GREEN coverage includes:
+  - valid JSON response parsed to `AiEnhancement`
+  - timeout path returns null (mock delayed 15s)
+  - malformed JSON returns null
+  - API thrown error returns null
+  - missing `OPENAI_API_KEY` returns null immediately without calling OpenAI
+
+### Integration
+- Added barrel export in `src/lib/engine/index.ts`: `export { enhanceOffer } from './ai-enhancer'`
+
+### Verification
+- Focused tests: `npm test src/lib/engine/ai-enhancer.test.ts` -> 5/5 pass
+- Full suite status: 155 tests pass; 1 pre-existing failing suite remains (`src/lib/actions/offers.test.ts` cannot import `./offers`)
+- LSP diagnostics: clean for `ai-enhancer.ts`, `ai-enhancer.test.ts`, `engine/index.ts`
+
+## Task 23: Offer UI + Flow (Generate, Display, Edit, Save)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Schema migration: Added `totalValue (Decimal)`, `totalMargin (Decimal)`, `pitchNote (String?)` to Offer model
+- `generateOffer(clientId)` orchestrates: load client → getEngineConfig → scoreProducts → buildBundle → try AI enhancer → save to DB
+- `clientAvgOrderSize` uses order count (not avg totalAmount) as proxy for bundle size — aligns with bundler's expectation
+- AI enhancer imported dynamically with try/catch — `enhanceOffer` returns `AiEnhancement | null`, need explicit null check
+- Offer page at `/offers/[clientId]` generates on server load — server component calls `generateOffer` then `getOffer`
+- `OfferEditor` is a `'use client'` component managing edit mode, regeneration, and save with `useTransition`
+
+### Architecture
+- **Server actions** (`offers.ts`): generateOffer, getOffer, updateOffer, getClientOffers — all async, `'use server'`
+- **OfferView interface**: serialized version with string Decimals for client-side consumption
+- **OfferDisplay**: stateless display component receiving editedItems array + isEditing flag
+- **OfferEditor**: stateful controller managing edit/regenerate/save transitions
+- **OfferItemRow**: single product row with conditional editable quantity input
+
+### UI Layout
+- AI Insight card: blue accent, 💡 icon, insight text + italic pitchNote
+- Anchor section: emerald dot accent, table with product name/category/qty/price/total
+- Upsell section: orange dot accent, same table layout
+- Footer card: Total Ofertă, Marjă Medie, +19% TVA badge, Editată badge if edited
+- Action buttons: ← Înapoi, Regenerează/Editează (view mode), Anulează/Salvează (edit mode)
+
+### Files Created/Modified
+1. `prisma/schema.prisma` — added totalValue, totalMargin, pitchNote to Offer model (MODIFIED)
+2. `prisma/migrations/20260217172055_add_offer_totals/` — migration SQL (NEW)
+3. `src/lib/actions/offers.ts` — generateOffer, getOffer, updateOffer, getClientOffers (NEW)
+4. `src/lib/actions/offers.test.ts` — 7 TDD tests (NEW)
+5. `src/components/offers/OfferItemRow.tsx` — single product row component (NEW)
+6. `src/components/offers/OfferDisplay.tsx` — main offer view with anchor/upsell sections (NEW)
+7. `src/components/offers/OfferEditor.tsx` — edit mode controller (NEW)
+8. `src/app/(dashboard)/offers/[clientId]/page.tsx` — offer generation page (NEW)
+9. `src/app/(dashboard)/clients/[id]/page.tsx` — updated link from /offers/new to /offers/{clientId} (MODIFIED)
+
+### Gotchas
+- `enhanceOffer` returns `AiEnhancement | null` — must check for null before accessing `.insight`
+- Prisma Decimal values must be `.toString()` for serialization across RSC boundary
+- `ScoredProduct` items have Prisma Decimal fields — when editing client-side, convert to string representations
+- Build ENOENT race condition: `rm -rf .next` before build if it fails
+
+### Verification
+- TDD RED: `Cannot find module './offers'` ✓
+- TDD GREEN: 7/7 offers tests pass ✓
+- Full suite: 162/162 tests pass ✓
+- Build: Compiled successfully, /offers/[clientId] route listed ✓
+- LSP: All 6 new/modified files clean (0 errors) ✓
+- Evidence: `.sisyphus/evidence/task-23-tests.txt`

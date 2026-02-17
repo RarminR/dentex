@@ -15,3 +15,6 @@ export {
 } from './defaults'
 
 export type { ProductCategory } from './defaults'
+
+export { scoreProducts } from './scorer'
+export { buildBundle } from './bundler'

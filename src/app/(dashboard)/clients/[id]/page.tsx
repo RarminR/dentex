@@ -39,7 +39,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
               {client.isActive ? RO.common.active : RO.common.inactive}
             </Badge>
             <Button asChild>
-              <Link href={`/offers/new?clientId=${client.id}`}>
+              <Link href={`/offers/${client.id}`}>
                 {RO.clients.generateOffer}
               </Link>
             </Button>

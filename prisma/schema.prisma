@@ -96,8 +96,11 @@ model Offer {
   generatedAt  DateTime @default(now())
   items        String
   aiInsight    String?
+  pitchNote    String?
   isEdited     Boolean  @default(false)
   engineConfig String
+  totalValue   Decimal  @default(0)
+  totalMargin  Decimal  @default(0)
   createdAt    DateTime @default(now())
 
   @@index([clientId])
