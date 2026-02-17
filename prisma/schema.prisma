@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  sku         String      @unique
+  category    String
+  description String?
+  unitPrice   Decimal
+  costPrice   Decimal
+  stockQty    Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+
+  @@index([category])
+}
+
+model Client {
+  id               String   @id @default(cuid())
+  companyName      String
+  contactPerson    String
+  email            String?
+  phone            String?
+  address          String?
+  city             String?
+  creditLimit      Decimal  @default(0)
+  paymentTermsDays Int      @default(30)
+  discountPercent  Decimal  @default(0)
+  notes            String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  orders           Order[]
+  offers           Offer[]
+
+  @@index([city])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  clientId    String
+  client      Client      @relation(fields: [clientId], references: [id])
+  orderDate   DateTime
+  totalAmount Decimal
+  status      String      @default("PENDING")
+  paidAmount  Decimal     @default(0)
+  isPaid      Boolean     @default(false)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  items       OrderItem[]
+
+  @@index([clientId])
+  @@index([orderDate])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
+  unitPrice  Decimal
+  discount   Decimal  @default(0)
+  totalPrice Decimal
+  createdAt  DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Offer {
+  id           String   @id @default(cuid())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id])
+  generatedAt  DateTime @default(now())
+  items        String
+  aiInsight    String?
+  isEdited     Boolean  @default(false)
+  engineConfig String
+  createdAt    DateTime @default(now())
+
+  @@index([clientId])
+}
