@@ -66,6 +66,11 @@ export const RO = {
     outstanding: 'Sold Restant',
     avgOrder: 'Valoare Medie Comandă',
     profitMargin: 'Marjă Profitabilitate',
+    totalOrders: 'Total Comenzi',
+    generateOffer: 'Generează Ofertă',
+    orderHistory: 'Istoric Comenzi',
+    financialSummary: 'Sumar Financiar',
+    allCities: 'Toate Orașele',
   },
   orders: {
     title: 'Comenzi',

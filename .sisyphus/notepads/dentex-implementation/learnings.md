@@ -209,3 +209,47 @@
 - Build: `npm run build` → Compiled successfully ✓
 - Routes: /products, /products/[id], /products/[id]/edit, /products/new ✓
 - Evidence: `.sisyphus/evidence/task-8-*.txt`
+
+## Task 9: Clients Module (CRUD + Financials + Discount)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Zod schemas use `z.coerce.number()` for creditLimit/discountPercent/paymentTermsDays — handles form string inputs
+- Empty optional strings (email, phone, etc.) stored as `null` in DB, accepted as `''` in Zod via `.optional().or(z.literal(''))`
+- `getClientFinancials` computes profitability from OrderItems: `(totalRevenue - totalCost) / totalRevenue * 100`
+- `getClients` filters only `isActive: true` by default — deactivated clients hidden from list
+- City filter via `distinct` query on active clients — dynamic filter values
+- `deactivateClient` is soft-delete only: sets `isActive = false`, never deletes
+
+### Financial Computation
+- totalSpent: `order.aggregate._sum.totalAmount`
+- totalPaid: `order.aggregate._sum.paidAmount`
+- outstandingBalance: `totalSpent.sub(totalPaid)` (Prisma Decimal arithmetic)
+- avgOrderValue: `totalSpent.div(totalOrders)` (or zero if no orders)
+- profitabilityMargin: `(totalRevenue - totalCost) / totalRevenue * 100` from OrderItems + Product.costPrice
+
+### Files Created
+1. `src/lib/validations/client.ts` — clientCreateSchema, clientUpdateSchema
+2. `src/lib/actions/clients.ts` — getClients, getClient, getClientFinancials, createClient, updateClient, deactivateClient
+3. `src/lib/actions/clients.test.ts` — 24 tests (TDD: validation, CRUD, financials)
+4. `src/components/clients/ClientForm.tsx` — shared create/edit form
+5. `src/components/clients/FinancialSummary.tsx` — 6 StatCards for financial metrics
+6. `src/components/clients/ClientsListView.tsx` — client-side list with search, city filter, pagination
+7. `src/components/clients/DeactivateButton.tsx` — confirm-then-deactivate button
+8. `src/app/(dashboard)/clients/page.tsx` — server page with initial data fetch
+9. `src/app/(dashboard)/clients/[id]/page.tsx` — detail page with financials + order history
+10. `src/app/(dashboard)/clients/new/page.tsx` — new client form page
+
+### Patterns
+- ClientsListView uses `useDebouncedCallback` for search (300ms debounce)
+- Server page fetches initial data + distinct cities, passes to client component
+- Detail page uses `Promise.all` for parallel getClient + getClientFinancials
+- "Generează Ofertă" button links to `/offers/new?clientId={id}` (page doesn't exist yet)
+- Prisma Decimal used throughout — `sub()`, `div()`, `add()`, `mul()`, `gt()` for all money arithmetic
+
+### Verification
+- Tests: 76/76 pass (24 new client tests) ✓
+- Build: `npm run build` → Compiled successfully ✓
+- Routes: /clients, /clients/[id], /clients/new all listed ✓
+- Evidence: `.sisyphus/evidence/task-9-*.txt`
