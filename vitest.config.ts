@@ -8,6 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['e2e/**'],
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', '.next/', 'prisma/', 'src/test/'],

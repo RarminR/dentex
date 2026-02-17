@@ -662,3 +662,30 @@
 - Build: Compiled successfully, /offers/[clientId] route listed ✓
 - LSP: All 6 new/modified files clean (0 errors) ✓
 - Evidence: `.sisyphus/evidence/task-23-tests.txt`
+
+## Task 24: Integration Testing (Cross-Module Flows)
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Used real SQLite test database with `DATABASE_URL=file:./test.db` set inside integration test module before dynamic imports
+- Used `npx prisma db push --skip-generate` in integration `beforeAll` to ensure schema exists for fresh `test.db`
+- Avoided mocking Prisma entirely; used real `PrismaClient` from `src/test/db.ts` and `cleanupDatabase()` in `beforeEach`/`afterAll`
+- Dynamically imported DB-bound modules (`scoreProducts`, `createOrder`, `getClientFinancials`) after setting test DB env and resetting modules
+- Mocked only `next/cache` (`revalidatePath`) to keep server actions callable outside Next request context
+
+### Coverage Added
+- Full offer pipeline flow: client + products + orders -> `scoreProducts` + `buildBundle`, verified order history affects `clientFrequency`
+- Price snapshot immutability: order item `unitPrice` remains historical value after product price update
+- Financial calculations: verified `getClientFinancials` totals (`totalSpent`, `totalPaid`, `outstandingBalance`) against known seed values
+- Settings -> offer impact: persisted custom engine weights in `Setting` and verified score changes vs default config
+
+### Test Infrastructure Notes
+- `vitest.config.ts` now has explicit `include: ['src/**/*.{test,spec}.{ts,tsx}']` to prevent accidental execution of dependency tests
+- `vitest.config.ts` excludes `e2e/**` from Vitest unit/integration runs
+
+### Verification
+- Integration: `npx vitest run src/test/integration/` -> pass
+- Full suite: `npm test` -> pass (18 files, 168 tests)
+- LSP diagnostics: clean for `src/test/integration/cross-module-flows.integration.test.ts` and `vitest.config.ts`
+- Evidence: `.sisyphus/evidence/task-24-integration-tests.txt`, `.sisyphus/evidence/task-24-npm-test.txt`, `.sisyphus/evidence/task-24-lsp.txt`

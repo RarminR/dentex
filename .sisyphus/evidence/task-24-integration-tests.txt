@@ -1,0 +1,10 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/arminasgari/dentex[39m
+
+ [32m✓[39m src/test/integration/cross-module-flows.integration.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1843[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 04:35:18
+[2m   Duration [22m 3.21s[2m (transform 142ms, setup 95ms, import 117ms, tests 1.84s, environment 822ms)[22m
+
