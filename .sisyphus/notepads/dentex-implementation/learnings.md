@@ -373,3 +373,41 @@
 ### Environment Note
 - Next.js 16 Turbopack ENOENT race condition on `.next/static/<hash>/_buildManifest.js.tmp.*`
 - Workaround: pre-create `.next/static` with `mkdir -p .next/static && chmod -R 777 .next` before `npm run build`
+
+## Task 17: Product Performance + Slow-Mover Reports
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- `getProductPerformance` queries `prisma.product.findMany` with `include: { orderItems: { include: { order: { select: { clientId, orderDate } } } } }`
+- `salesVelocity = totalUnitsSold / monthsInRange` where `monthsInRange = Math.max(1, days / 30)` — minimum 1 month denominator
+- `getSlowMovers` reuses same query logic, sorts ascending, takes bottom X% (`Math.ceil(count * threshold / 100)`)
+- Shared `buildProductPerformanceRows` helper avoids code duplication between both functions
+- Both functions return `number` for monetary values (not Decimal strings) — simpler for frontend display
+- Tab toggle UI built with plain buttons + border-bottom styling (no shadcn Tabs component)
+- Date range filter uses URL searchParams (consistent with Orders/Products modules)
+
+### salesVelocity Formula
+- `monthsInRange = Math.max(1, daysDiff / 30)`
+- `salesVelocity = totalUnitsSold / monthsInRange` (rounded to 2 decimal places)
+- For 0 sales: `salesVelocity = 0` (no division needed)
+- Test date ranges: use exact 90-day spans (Jan 1 → Apr 1) to avoid off-by-one in day calculations
+
+### Slow-Mover Threshold
+- Default: bottom 20% by salesVelocity
+- `cutoff = Math.max(1, Math.ceil(totalProducts * thresholdPercent / 100))`
+- Always returns at least 1 product (even if only 1 product exists)
+- Sorted ascending (slowest first)
+
+### Files Created/Modified
+1. `src/lib/actions/reports.ts` — APPENDED getProductPerformance, getSlowMovers + shared helpers
+2. `src/lib/actions/reports.test.ts` — APPENDED 8 TDD tests (4 performance + 4 slow-mover)
+3. `src/components/reports/ProductReportView.tsx` — client component with tab toggle + DataTable
+4. `src/app/(dashboard)/reports/products/page.tsx` — server page with date range filtering
+
+### Verification
+- TDD: 8 tests RED → GREEN cycle verified
+- Tests: 140/140 pass (8 new + 10 existing reports tests)
+- Build: Compiled successfully, /reports/products route listed
+- LSP: All new files clean (0 errors)
+- Evidence: `.sisyphus/evidence/task-17-*.txt`

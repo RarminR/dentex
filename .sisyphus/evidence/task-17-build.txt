@@ -1,0 +1,16 @@
+Task 17: Product Performance + Slow-Movers Reports — Build Evidence
+
+Build: npm run build → Compiled successfully in 2.9s
+
+Route (app)
+├ ƒ /reports
+├ ƒ /reports/products    ← NEW
+├ ƒ /reports/profitability
+
+ƒ  (Dynamic)  server-rendered on demand
+
+TypeScript: npx tsc --noEmit → No errors in reports.ts, ProductReportView.tsx, or page.tsx
+(Pre-existing errors only in clients.test.ts mock typing, unrelated)
+
+Note: Turbopack ENOENT race condition is a pre-existing environment issue
+(confirmed by stashing changes and building — same failure without my code)

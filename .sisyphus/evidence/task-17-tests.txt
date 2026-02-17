@@ -1,0 +1,19 @@
+Task 17: Product Performance + Slow-Movers Reports — Test Evidence
+
+TDD RED Phase (8 new tests fail):
+- getProductPerformance: calculates salesVelocity as totalUnitsSold / monthsInRange → FAIL (Not implemented)
+- getProductPerformance: uses minimum 1 month when range < 30 days → FAIL (Not implemented)
+- getProductPerformance: returns salesVelocity 0 for products with no orders → FAIL (Not implemented)
+- getProductPerformance: sorts by salesVelocity descending → FAIL (Not implemented)
+- getSlowMovers: returns bottom 20% of products by salesVelocity → FAIL (Not implemented)
+- getSlowMovers: sorts slow movers by salesVelocity ascending → FAIL (Not implemented)
+- getSlowMovers: includes stock, category, lastOrderDate → FAIL (Not implemented)
+- getSlowMovers: uses custom threshold percentage → FAIL (Not implemented)
+
+TDD GREEN Phase (all 18 pass):
+Test Files  1 passed (1)
+     Tests  18 passed (18)
+
+Full Suite:
+Test Files  12 passed (12)
+     Tests  140 passed (140)
