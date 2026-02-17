@@ -8,10 +8,16 @@ const mockPrisma = {
     count: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
+    create: vi.fn(),
   },
   client: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
   },
+  product: {
+    findMany: vi.fn(),
+  },
+  $transaction: vi.fn(),
 }
 
 vi.mock('@/lib/prisma', () => ({
@@ -22,7 +28,11 @@ vi.mock('@/lib/auth', () => ({
   auth: vi.fn().mockResolvedValue({ user: { id: 'user-1', name: 'Admin' } }),
 }))
 
-const { getOrders, getOrder, updateOrderPayment } = await import('./orders')
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+}))
+
+const { getOrders, getOrder, updateOrderPayment, createOrder } = await import('./orders')
 
 const d = (val: number | string) => new Prisma.Decimal(val)
 
@@ -240,5 +250,103 @@ describe('updateOrderPayment', () => {
     await expect(updateOrderPayment('bad-id', '100')).rejects.toThrow(
       'Comanda nu a fost găsită'
     )
+  })
+})
+
+describe('createOrder', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('creates Order + OrderItems atomically via nested create', async () => {
+    const client = createMockClient({ id: 'client-1', discountPercent: d('10.00') })
+    const product1 = createMockProduct({ id: 'prod-1', unitPrice: d('100.00') })
+    const product2 = createMockProduct({ id: 'prod-2', unitPrice: d('200.00') })
+
+    mockPrisma.client.findUnique.mockResolvedValue(client)
+    mockPrisma.product.findMany.mockResolvedValue([product1, product2])
+    mockPrisma.order.create.mockResolvedValue({ id: 'new-order-1' })
+
+    const result = await createOrder({
+      clientId: 'client-1',
+      items: [
+        { productId: 'prod-1', quantity: 2 },
+        { productId: 'prod-2', quantity: 1 },
+      ],
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.id).toBe('new-order-1')
+    expect(mockPrisma.order.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          items: expect.objectContaining({ create: expect.any(Array) }),
+        }),
+      })
+    )
+  })
+
+  it('snapshots unitPrice and discount correctly', async () => {
+    const client = createMockClient({ id: 'client-1', discountPercent: d('15.00') })
+    const product = createMockProduct({ id: 'prod-1', unitPrice: d('200.00') })
+
+    mockPrisma.client.findUnique.mockResolvedValue(client)
+    mockPrisma.product.findMany.mockResolvedValue([product])
+    mockPrisma.order.create.mockResolvedValue({ id: 'new-order-1' })
+
+    await createOrder({
+      clientId: 'client-1',
+      items: [{ productId: 'prod-1', quantity: 3 }],
+    })
+
+    const createCall = mockPrisma.order.create.mock.calls[0][0]
+    const item = createCall.data.items.create[0]
+
+    expect(item.unitPrice.equals(d('200.00'))).toBe(true)
+    expect(item.discount.equals(d('15.00'))).toBe(true)
+  })
+
+  it('calculates totalAmount correctly with discount', async () => {
+    const client = createMockClient({ id: 'client-1', discountPercent: d('10.00') })
+    const product = createMockProduct({ id: 'prod-1', unitPrice: d('100.00') })
+
+    mockPrisma.client.findUnique.mockResolvedValue(client)
+    mockPrisma.product.findMany.mockResolvedValue([product])
+    mockPrisma.order.create.mockResolvedValue({ id: 'new-order-1' })
+
+    await createOrder({
+      clientId: 'client-1',
+      items: [{ productId: 'prod-1', quantity: 5 }],
+    })
+
+    const createCall = mockPrisma.order.create.mock.calls[0][0]
+    const item = createCall.data.items.create[0]
+
+    // totalPrice per item: 5 × (100 × (1 - 10/100)) = 5 × 90 = 450
+    expect(item.totalPrice.equals(d('450'))).toBe(true)
+    // totalAmount = sum of all item totalPrices = 450
+    expect(createCall.data.totalAmount.equals(d('450'))).toBe(true)
+  })
+
+  it('rejects if no items provided', async () => {
+    const result = await createOrder({
+      clientId: 'client-1',
+      items: [],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBeDefined()
+  })
+
+  it('rejects if clientId is invalid (client not found)', async () => {
+    mockPrisma.client.findUnique.mockResolvedValue(null)
+
+    const result = await createOrder({
+      clientId: 'bad-id',
+      items: [{ productId: 'prod-1', quantity: 1 }],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBeDefined()
   })
 })

@@ -1,0 +1,43 @@
+
+> dentex@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.1s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/14) ...
+  Generating static pages using 7 workers (3/14) 
+  Generating static pages using 7 workers (6/14) 
+  Generating static pages using 7 workers (10/14) 
+✓ Generating static pages using 7 workers (14/14) in 186.4ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /clients
+├ ƒ /clients/[id]
+├ ƒ /clients/new
+├ ƒ /dashboard
+├ ○ /login
+├ ƒ /orders
+├ ƒ /orders/[id]
+├ ƒ /orders/new
+├ ƒ /products
+├ ƒ /products/[id]
+├ ƒ /products/[id]/edit
+├ ƒ /products/new
+├ ƒ /reports
+└ ƒ /settings
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -253,3 +253,46 @@
 - Build: `npm run build` → Compiled successfully ✓
 - Routes: /clients, /clients/[id], /clients/new all listed ✓
 - Evidence: `.sisyphus/evidence/task-9-*.txt`
+
+## Task 11: Order Creation Flow with Client Discount Pricing
+
+**Completed:** 2026-02-18
+
+### Key Decisions
+- Used Prisma nested creates (`order.create({ data: { items: { create: [...] } } })`) for atomic Order+OrderItems creation — implicit transaction
+- Avoided interactive `$transaction` due to Prisma 5.22.0 type inference issues with transaction client (`tx.client` not typed)
+- Price snapshots: `OrderItem.unitPrice` from Product, `OrderItem.discount` from Client.discountPercent at creation time
+- `applyDiscount(unitPrice, discount)` from `@/lib/utils/decimal.ts` for effective price calculation
+- TVA computed display-only on frontend via `calculateWithTVA` from format.ts — NOT stored in DB
+- Multi-step form state managed in client component (`NewOrderForm`), server component (`page.tsx`) only fetches data
+
+### Pricing Formula
+- `effectivePrice = unitPrice × (1 - discountPercent / 100)` via `applyDiscount`
+- `totalPrice = effectivePrice × quantity` via `Decimal.times()`
+- `totalAmount = sumDecimals(itemTotalPrices)`
+- TVA display: `subtotal + TVA 19% = total cu TVA` (frontend only)
+
+### Multi-Step UI
+1. **Select Client**: searchable list showing companyName + discountPercent badge
+2. **Add Products**: search products, set quantity, see effective price with discount annotation
+3. **Review + Confirm**: full summary with subtotal, TVA 19%, total cu TVA, then "Confirmă Comanda" → redirect to `/orders/[id]`
+
+### Files Created
+1. `src/app/(dashboard)/orders/new/page.tsx` — server page fetching clients + products
+2. `src/components/orders/NewOrderForm.tsx` — client-side multi-step form controller
+3. `src/components/orders/OrderProductSelector.tsx` — product search + quantity + pricing
+4. `src/components/orders/OrderSummary.tsx` — review with TVA display
+5. `src/lib/actions/orders.ts` — added `createOrder` (appended, not replaced)
+6. `src/lib/actions/orders.test.ts` — added 5 TDD tests (appended, not replaced)
+
+### Patterns
+- `getClients({ pageSize: 200 })` and `getProducts({ pageSize: 200 })` to fetch all for client-side filtering
+- `OrderItemDraft` interface for client-side item state (string prices for display)
+- Step indicator with numbered circles (current=primary, completed=emerald, pending=muted)
+- Unicode escapes for Romanian chars in JSX to avoid encoding issues
+
+### Verification
+- Tests: 81/81 pass (5 new createOrder tests) ✓
+- Build: `npm run build` → Compiled successfully, /orders/new route listed ✓
+- LSP: All new files clean (0 errors) ✓
+- Evidence: `.sisyphus/evidence/task-11-*.txt`

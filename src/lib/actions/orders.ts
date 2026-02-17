@@ -2,6 +2,8 @@
 
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
+import { applyDiscount, sumDecimals } from '@/lib/utils/decimal'
 
 interface GetOrdersParams {
   page?: number
@@ -100,4 +102,64 @@ export async function getClientsForFilter() {
     select: { id: true, companyName: true },
     orderBy: { companyName: 'asc' },
   })
+}
+
+export async function createOrder(data: {
+  clientId: string
+  items: Array<{ productId: string; quantity: number }>
+  notes?: string
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (!data.items?.length) {
+    return { success: false, error: 'Comanda trebuie să conțină cel puțin un produs' }
+  }
+
+  try {
+    const client = await prisma.client.findUnique({ where: { id: data.clientId } })
+    if (!client) {
+      return { success: false, error: 'Clientul nu a fost găsit' }
+    }
+
+    const productIds = data.items.map((i) => i.productId)
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    })
+
+    const itemsData = data.items.map((item) => {
+      const product = products.find((p: { id: string }) => p.id === item.productId)
+      if (!product) throw new Error(`Produsul ${item.productId} nu a fost găsit`)
+
+      const unitPrice = product.unitPrice
+      const discount = client.discountPercent
+      const effectivePrice = applyDiscount(unitPrice, discount)
+      const totalPrice = effectivePrice.times(item.quantity)
+
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice,
+        discount,
+        totalPrice,
+      }
+    })
+
+    const totalAmount = sumDecimals(itemsData.map((i) => i.totalPrice))
+
+    const order = await prisma.order.create({
+      data: {
+        clientId: data.clientId,
+        orderDate: new Date(),
+        totalAmount,
+        notes: data.notes || null,
+        items: { create: itemsData },
+      },
+    })
+
+    revalidatePath('/orders')
+    return { success: true, id: order.id }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Eroare la crearea comenzii',
+    }
+  }
 }
