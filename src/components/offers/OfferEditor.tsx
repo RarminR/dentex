@@ -68,6 +68,14 @@ export function OfferEditor({ initialOffer }: OfferEditorProps) {
     )
   }, [])
 
+  const handleRoleChange = useCallback((productId: string, role: 'anchor' | 'upsell') => {
+    setEditedItems((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, role } : item
+      )
+    )
+  }, [])
+
   function handleEdit() {
     setIsEditing(true)
     setFeedback(null)
@@ -167,6 +175,7 @@ export function OfferEditor({ initialOffer }: OfferEditorProps) {
         isEditing={isEditing}
         editedItems={editedItems}
         onQuantityChange={handleQuantityChange}
+        onRoleChange={handleRoleChange}
       />
     </div>
   )

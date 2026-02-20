@@ -8,17 +8,25 @@ function clamp(value: number, min: number, max: number): number {
 
 function sortByAffinity(
   products: ScoredProduct[],
-  affinityFn: (product: ScoredProduct) => number
+  affinityFn: (product: ScoredProduct) => number,
+  jitterStrength = 0
 ): ScoredProduct[] {
-  return [...products].sort((a, b) => {
-    const affinityDiff = affinityFn(b) - affinityFn(a)
-    if (affinityDiff !== 0) return affinityDiff
+  const jittered = products.map((p) => ({
+    product: p,
+    jitter: jitterStrength > 0 ? (Math.random() - 0.5) * 2 * jitterStrength : 0,
+  }))
 
-    const compositeDiff = b.compositeScore - a.compositeScore
-    if (compositeDiff !== 0) return compositeDiff
+  jittered.sort((a, b) => {
+    const affinityDiff = (affinityFn(b.product) + b.jitter) - (affinityFn(a.product) + a.jitter)
+    if (Math.abs(affinityDiff) > 1e-9) return affinityDiff
 
-    return a.productId.localeCompare(b.productId)
+    const compositeDiff = b.product.compositeScore - a.product.compositeScore
+    if (Math.abs(compositeDiff) > 1e-9) return compositeDiff
+
+    return a.product.productId.localeCompare(b.product.productId)
   })
+
+  return jittered.map((j) => j.product)
 }
 
 function selectWithCategoryCap(
@@ -60,9 +68,12 @@ export function buildBundle(
 
   const categoryCounts = new Map<string, number>()
 
+  const jitter = 0.15
+
   const anchorRanked = sortByAffinity(
     scoredProducts,
-    (product) => product.scoreBreakdown.clientFrequency + product.scoreBreakdown.globalPopularity
+    (product) => product.scoreBreakdown.clientFrequency + product.scoreBreakdown.globalPopularity,
+    jitter
   )
 
   const selectedAnchors = selectWithCategoryCap(
@@ -78,7 +89,8 @@ export function buildBundle(
 
   const upsellRanked = sortByAffinity(
     upsellCandidates,
-    (product) => product.scoreBreakdown.slowMoverPush + product.scoreBreakdown.margin
+    (product) => product.scoreBreakdown.slowMoverPush + product.scoreBreakdown.margin,
+    jitter
   )
 
   const selectedUpsells = selectWithCategoryCap(

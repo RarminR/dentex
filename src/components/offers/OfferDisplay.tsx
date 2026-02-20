@@ -19,6 +19,7 @@ interface OfferDisplayProps {
     marginPercent: string
   }>
   onQuantityChange?: (productId: string, qty: number) => void
+  onRoleChange?: (productId: string, role: 'anchor' | 'upsell') => void
 }
 
 export function OfferDisplay({
@@ -26,6 +27,7 @@ export function OfferDisplay({
   isEditing,
   editedItems,
   onQuantityChange,
+  onRoleChange,
 }: OfferDisplayProps) {
   const items = editedItems
   const anchors = items.filter((i) => i.role === 'anchor')
@@ -93,6 +95,7 @@ export function OfferDisplay({
                       role="anchor"
                       isEditing={isEditing}
                       onQuantityChange={(qty) => onQuantityChange?.(item.productId, qty)}
+                      onRoleChange={(role) => onRoleChange?.(item.productId, role)}
                     />
                   ))}
                 </tbody>
@@ -133,6 +136,7 @@ export function OfferDisplay({
                       role="upsell"
                       isEditing={isEditing}
                       onQuantityChange={(qty) => onQuantityChange?.(item.productId, qty)}
+                      onRoleChange={(role) => onRoleChange?.(item.productId, role)}
                     />
                   ))}
                 </tbody>
