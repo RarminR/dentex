@@ -225,9 +225,9 @@ describe('integration: cross-module flows (real sqlite db)', () => {
 
     const financials = await getClientFinancials(client.id)
 
-    expect(financials.totalSpent.toFixed(2)).toBe('1500.00')
-    expect(financials.totalPaid.toFixed(2)).toBe('800.00')
-    expect(financials.outstandingBalance.toFixed(2)).toBe('700.00')
+    expect(Number(financials.totalSpent).toFixed(2)).toBe('1500.00')
+    expect(Number(financials.totalPaid).toFixed(2)).toBe('800.00')
+    expect(Number(financials.outstandingBalance).toFixed(2)).toBe('700.00')
   })
 
   it('settings-driven weight changes alter offer scoring results', async () => {
