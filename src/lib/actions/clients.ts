@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { clientCreateSchema, clientUpdateSchema } from '@/lib/validations/client'
 import { revalidatePath } from 'next/cache'
+import { serialize } from '@/lib/utils/decimal'
 
 export interface ClientListParams {
   page?: number
@@ -76,11 +77,11 @@ export async function getClients(params: ClientListParams): Promise<ClientListRe
     prisma.client.count({ where }),
   ])
 
-  return { clients, total, page, pageSize }
+  return serialize({ clients, total, page, pageSize })
 }
 
 export async function getClient(id: string) {
-  return prisma.client.findUnique({
+  const client = await prisma.client.findUnique({
     where: { id },
     include: {
       orders: {
@@ -89,6 +90,7 @@ export async function getClient(id: string) {
       },
     },
   })
+  return serialize(client)
 }
 
 export async function getClientFinancials(id: string): Promise<ClientFinancials> {
@@ -129,14 +131,14 @@ export async function getClientFinancials(id: string): Promise<ClientFinancials>
     ? totalRevenue.sub(totalCost).div(totalRevenue).mul(100)
     : zero
 
-  return {
+  return serialize({
     totalSpent,
     totalPaid,
     outstandingBalance,
     avgOrderValue,
     totalOrders,
     profitabilityMargin,
-  }
+  })
 }
 
 export async function createClient(data: unknown): Promise<ActionResult> {

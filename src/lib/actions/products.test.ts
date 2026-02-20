@@ -114,7 +114,12 @@ describe('getProduct', () => {
 
     const result = await getProduct('product-1')
 
-    expect(result).toEqual(product)
+    expect(result).toBeTruthy()
+    expect(result!.id).toBe(product.id)
+    expect(result!.name).toBe(product.name)
+    expect(result!.sku).toBe(product.sku)
+    expect(String(result!.unitPrice)).toBe(String(product.unitPrice))
+    expect(String(result!.costPrice)).toBe(String(product.costPrice))
     expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
       where: { id: 'product-1' },
     })

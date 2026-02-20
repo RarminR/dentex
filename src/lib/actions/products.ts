@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { serialize } from '@/lib/utils/decimal'
 import { productCreateSchema, productUpdateSchema, type ProductCreateInput, type ProductUpdateInput } from '@/lib/validations/product'
 
 interface GetProductsParams {
@@ -45,11 +46,11 @@ export async function getProducts({
     prisma.product.count({ where }),
   ])
 
-  return { data, total, page, pageSize }
+  return serialize({ data, total, page, pageSize })
 }
 
 export async function getProduct(id: string) {
-  return prisma.product.findUnique({ where: { id } })
+  return serialize(await prisma.product.findUnique({ where: { id } }))
 }
 
 type ActionResult = {
