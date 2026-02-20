@@ -16,6 +16,14 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/login', req.nextUrl))
   }
 
+  if (req.nextUrl.pathname === '/' && isLoggedIn) {
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
+  }
+
+  if (req.nextUrl.pathname === '/' && !isLoggedIn) {
+    return NextResponse.redirect(new URL('/login', req.nextUrl))
+  }
+
   if (req.nextUrl.pathname === '/login' && isLoggedIn) {
     return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
   }
