@@ -6,6 +6,7 @@ import { compare, hash } from 'bcryptjs'
 import { DEFAULT_ENGINE_CONFIG, validateWeights } from '@/lib/engine/defaults'
 import type { EngineConfig } from '@/lib/engine/types'
 import { revalidatePath } from 'next/cache'
+import { engineConfigSchema, changePasswordSchema } from '@/lib/validations/settings'
 
 export async function getEngineConfig(): Promise<EngineConfig> {
   const setting = await prisma.setting.findUnique({
@@ -20,6 +21,12 @@ export async function getEngineConfig(): Promise<EngineConfig> {
 export async function updateEngineConfig(
   config: EngineConfig
 ): Promise<{ success: true } | { success: false; error: string }> {
+  const parsed = engineConfigSchema.safeParse(config)
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Configurație invalidă'
+    return { success: false, error: firstError }
+  }
+
   const session = await auth()
   if (!session?.user) {
     return { success: false, error: 'Neautorizat' }
@@ -43,8 +50,10 @@ export async function changePassword(
   currentPassword: string,
   newPassword: string
 ): Promise<{ success: true } | { success: false; error: string }> {
-  if (newPassword.length < 6) {
-    return { success: false, error: 'Parola nou\u0103 trebuie s\u0103 aib\u0103 cel pu\u021bin 6 caractere' }
+  const parsed = changePasswordSchema.safeParse({ currentPassword, newPassword })
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Date invalide'
+    return { success: false, error: firstError }
   }
 
   const session = await auth()
