@@ -2,10 +2,10 @@
 
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
 import { scoreProducts } from '@/lib/engine/scorer'
 import { buildBundle } from '@/lib/engine/bundler'
 import { getEngineConfig } from '@/lib/actions/settings'
+import { serialize } from '@/lib/utils/decimal'
 import type { ScoredProduct, GeneratedOffer } from '@/lib/engine/types'
 
 export interface OfferResult {
@@ -99,8 +99,7 @@ export async function generateOffer(clientId: string): Promise<OfferResult> {
     pitchNote: pitchNote ?? undefined,
   }
 
-  revalidatePath(`/offers/${clientId}`)
-  return { success: true, offerId: saved.id, offer }
+  return serialize({ success: true, offerId: saved.id, offer })
 }
 
 export async function getOffer(id: string): Promise<OfferView | null> {
@@ -111,7 +110,7 @@ export async function getOffer(id: string): Promise<OfferView | null> {
 
   if (!offer) return null
 
-  return {
+  return serialize({
     id: offer.id,
     clientId: offer.clientId,
     clientName: offer.client.companyName,
@@ -124,7 +123,7 @@ export async function getOffer(id: string): Promise<OfferView | null> {
     generatedAt: offer.generatedAt,
     createdAt: offer.createdAt,
     engineConfig: offer.engineConfig,
-  }
+  })
 }
 
 export async function updateOffer(
@@ -175,5 +174,5 @@ export async function getClientOffers(clientId: string): Promise<OfferListItem[]
     orderBy: { createdAt: 'desc' },
   })
 
-  return offers
+  return serialize(offers)
 }

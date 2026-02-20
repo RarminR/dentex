@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { Decimal } from '@prisma/client/runtime/library'
+import { compareDecimalStrs, serialize } from '@/lib/utils/decimal'
 
 interface DashboardKPIs {
   totalRevenue: string
@@ -129,8 +130,8 @@ export async function getDashboardData(): Promise<DashboardData> {
         .reduce((sum, o) => sum.plus(o.totalAmount), ZERO)
         .toFixed(2),
     }))
-    .filter((c) => parseFloat(c.revenue) > 0)
-    .sort((a, b) => parseFloat(b.revenue) - parseFloat(a.revenue))
+    .filter((c) => compareDecimalStrs(c.revenue, '0') > 0)
+    .sort((a, b) => compareDecimalStrs(b.revenue, a.revenue))
     .slice(0, 5)
 
   const twelveMonthsAgo = new Date(
@@ -176,7 +177,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     status: o.status,
   }))
 
-  return {
+  return serialize({
     kpis: {
       totalRevenue: totalRevenue.toFixed(2),
       orderCount,
@@ -188,5 +189,5 @@ export async function getDashboardData(): Promise<DashboardData> {
     topClients,
     slowMovers,
     recentOrders,
-  }
+  })
 }
