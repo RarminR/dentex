@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Prisma } from '@prisma/client'
+
 import { Header } from '@/components/layout/Header'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Button } from '@/components/ui/button'
@@ -101,7 +101,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                       </tr>
                     </thead>
                     <tbody>
-                      {client.orders.map((order: { id: string; orderDate: Date; status: string; totalAmount: Prisma.Decimal; paidAmount: Prisma.Decimal }) => (
+                      {(client.orders as unknown as Array<{ id: string; orderDate: string; status: string; totalAmount: string; paidAmount: string }>).map((order) => (
                         <tr key={order.id} className="border-b last:border-0 hover:bg-gray-50">
                           <td className="py-2 pr-4">{formatDate(order.orderDate)}</td>
                           <td className="py-2 pr-4">
@@ -111,10 +111,10 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                                RO.orders.cancelled}
                             </Badge>
                           </td>
-                          <td className="py-2 pr-4 text-right">{formatCurrency(order.totalAmount.toString())}</td>
-                          <td className="py-2 pr-4 text-right">{formatCurrency(order.paidAmount.toString())}</td>
+                          <td className="py-2 pr-4 text-right">{formatCurrency(order.totalAmount)}</td>
+                          <td className="py-2 pr-4 text-right">{formatCurrency(order.paidAmount)}</td>
                           <td className="py-2 text-right">
-                            {formatCurrency(order.totalAmount.sub(order.paidAmount).toString())}
+                            {formatCurrency((parseFloat(order.totalAmount) - parseFloat(order.paidAmount)).toString())}
                           </td>
                         </tr>
                       ))}

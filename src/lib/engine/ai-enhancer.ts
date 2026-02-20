@@ -119,12 +119,14 @@ export async function enhanceOffer(
       return null
     }
 
-    const rawJson = response.output_text
-    if (!rawJson) {
+    const rawText = response.output_text
+    if (!rawText) {
       console.error('[AI] enhancement failed: empty response')
       return null
     }
 
+    // Strip markdown code fences if the model wraps its response
+    const rawJson = rawText.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
     const parsedJson = JSON.parse(rawJson)
     const parsed = aiEnhancementSchema.safeParse(parsedJson)
 
