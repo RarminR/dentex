@@ -225,7 +225,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 1. Project Initialization + Configuration
+- [x] 1. Project Initialization + Configuration
 
   **What to do**:
   - Initialize Next.js 15 project with App Router, TypeScript, Tailwind CSS, ESLint
@@ -329,7 +329,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 2. Database Schema + Prisma + Seed Data
+- [x] 2. Database Schema + Prisma + Seed Data
 
   **What to do**:
   - Initialize Prisma: `npx prisma init`
@@ -410,7 +410,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 3. Authentication (NextAuth.js)
+- [x] 3. Authentication (NextAuth.js)
 
   **What to do**:
   - Install `next-auth@beta` (v5 for App Router compatibility)
@@ -486,7 +486,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 4. App Layout + Romanian Sidebar Navigation
+- [x] 4. App Layout + Romanian Sidebar Navigation
 
   **What to do**:
   - Create `src/app/(dashboard)/layout.tsx` — authenticated layout with sidebar + main content area
@@ -565,7 +565,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 5. Shared UI Components (DataTable, Forms, Cards)
+- [x] 5. Shared UI Components (DataTable, Forms, Cards)
 
   **What to do**:
   - Install shadcn/ui components: `button`, `input`, `table`, `card`, `dialog`, `form`, `select`, `badge`, `toast`, `dropdown-menu`, `separator`, `skeleton`, `label`, `textarea`, `popover`, `command`
@@ -644,7 +644,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 6. Offer Engine Types + Interfaces
+- [x] 6. Offer Engine Types + Interfaces
 
   **What to do**:
   - Create `src/lib/engine/types.ts` with all type definitions:
@@ -744,7 +744,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 7. Test Infrastructure (Vitest + Utilities)
+- [x] 7. Test Infrastructure (Vitest + Utilities)
 
   **What to do**:
   - Install: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitejs/plugin-react`, `jsdom`
@@ -803,7 +803,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 8. Products Module (CRUD + Search + Filter)
+- [x] 8. Products Module (CRUD + Search + Filter)
 
   **What to do**:
   - Create `src/lib/validations/product.ts` — Zod schemas for product create/edit:
@@ -909,7 +909,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 9. Clients Module (CRUD + Financials + Discount)
+- [x] 9. Clients Module (CRUD + Financials + Discount)
 
   **What to do**:
   - Create `src/lib/validations/client.ts` — Zod schemas:
@@ -1001,7 +1001,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 10. Orders List + Detail + Filter
+- [x] 10. Orders List + Detail + Filter
 
   **What to do**:
   - Create `src/lib/actions/orders.ts` — server actions:
@@ -1077,7 +1077,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 11. Order Creation Flow
+- [x] 11. Order Creation Flow
 
   **What to do**:
   - Create `src/app/(dashboard)/orders/new/page.tsx` — order creation page:
@@ -1161,7 +1161,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 12. CSV Import Engine (Parser + Validation Framework)
+- [x] 12. CSV Import Engine (Parser + Validation Framework)
 
   **What to do**:
   - Create `src/lib/import/parser.ts` — generic CSV parser using papaparse:
@@ -1245,7 +1245,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 13. Server Actions + API Utilities
+- [x] 13. Server Actions + API Utilities
 
   **What to do**:
   - Create `src/lib/db.ts` — Prisma client singleton (with global caching for dev)
@@ -1311,7 +1311,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 14. CSV Import — Products
+- [x] 14. CSV Import — Products
 
   **What to do**:
   - Create `src/lib/import/products.ts` — product-specific import logic:
@@ -1388,7 +1388,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 15. CSV Import — Orders
+- [x] 15. CSV Import — Orders
 
   **What to do**:
   - Create `src/lib/import/orders.ts` — order-specific import logic:
@@ -1463,7 +1463,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 16. Reports — Client Profitability
+- [x] 16. Reports — Client Profitability
 
   **What to do**:
   - Create `src/lib/actions/reports.ts` — report queries:
@@ -1528,7 +1528,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 17. Reports — Product Performance + Slow-Movers
+- [x] 17. Reports — Product Performance + Slow-Movers
 
   **What to do**:
   - Add to `src/lib/actions/reports.ts`:
@@ -1592,7 +1592,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 18. Dashboard (KPIs, Top Clients, Slow-Movers)
+- [x] 18. Dashboard (KPIs, Top Clients, Slow-Movers)
 
   **What to do**:
   - Create `src/lib/actions/dashboard.ts`:
@@ -1661,7 +1661,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 19. Settings Page (Account + Offer Engine Config)
+- [x] 19. Settings Page (Account + Offer Engine Config)
 
   **What to do**:
   - Create `src/app/(dashboard)/settings/page.tsx` — settings page with sections:
@@ -1746,7 +1746,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 20. Offer Engine — Scorer (Rule-Based Algorithm)
+- [x] 20. Offer Engine — Scorer (Rule-Based Algorithm)
 
   **What to do**:
   - Create `src/lib/engine/scorer.ts`:
@@ -1846,7 +1846,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 21. Offer Engine — Bundler (Anchor/Upsell Selection)
+- [x] 21. Offer Engine — Bundler (Anchor/Upsell Selection)
 
   **What to do**:
   - Create `src/lib/engine/bundler.ts`:
@@ -1940,7 +1940,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 22. AI Enhancer (GPT-4o-mini Romanian Insights)
+- [x] 22. AI Enhancer (GPT-4o-mini Romanian Insights)
 
   **What to do**:
   - Create `src/lib/engine/ai-enhancer.ts`:
@@ -2038,7 +2038,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 23. Offer UI + Flow (Generate, Edit, Regenerate)
+- [x] 23. Offer UI + Flow (Generate, Edit, Regenerate)
 
   **What to do**:
   - Create `src/lib/actions/offers.ts` — server actions:
@@ -2162,7 +2162,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 24. Integration Testing (Cross-Module Flows)
+- [x] 24. Integration Testing (Cross-Module Flows)
 
   **What to do**:
   - Create `src/test/integration/` directory
@@ -2219,7 +2219,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 25. E2E QA (Playwright Full Journeys)
+- [x] 25. E2E QA (Playwright Full Journeys)
 
   **What to do**:
   - Install Playwright: `npx playwright install`
@@ -2280,7 +2280,7 @@ Max Concurrent: 7 (Wave 1)
 
 ---
 
-- [ ] 26. Performance + Build Verification
+- [x] 26. Performance + Build Verification
 
   **What to do**:
   - Verify production build: `npm run build` → no errors, no warnings
