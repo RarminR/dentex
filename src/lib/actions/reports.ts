@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
+import { compareDecimalStrs, serialize } from '@/lib/utils/decimal'
 
 interface ProfitabilityParams {
   dateFrom?: Date
@@ -88,13 +89,13 @@ export async function getClientProfitability(
     }
   })
 
-  rows.sort((a, b) => parseFloat(b.profit) - parseFloat(a.profit))
+  rows.sort((a, b) => compareDecimalStrs(b.profit, a.profit))
 
   if (limit) {
-    return rows.slice(0, limit)
+    return serialize(rows.slice(0, limit))
   }
 
-  return rows
+  return serialize(rows)
 }
 
 interface ProductPerformanceRow {
@@ -202,7 +203,7 @@ export async function getProductPerformance(params: {
 
   rows.sort((a, b) => b.salesVelocity - a.salesVelocity)
 
-  return rows.map(({ stockQty: _s, lastOrderDate: _l, ...rest }) => rest)
+  return serialize(rows.map(({ stockQty: _s, lastOrderDate: _l, ...rest }) => rest))
 }
 
 export async function getSlowMovers(params: {

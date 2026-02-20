@@ -3,7 +3,8 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { applyDiscount, sumDecimals } from '@/lib/utils/decimal'
+import { applyDiscount, sumDecimals, serialize } from '@/lib/utils/decimal'
+import { orderCreateSchema } from '@/lib/validations/order'
 
 interface GetOrdersParams {
   page?: number
@@ -61,11 +62,11 @@ export async function getOrders({
     prisma.order.count({ where }),
   ])
 
-  return { orders, total }
+  return serialize({ orders, total })
 }
 
 export async function getOrder(id: string) {
-  return prisma.order.findUnique({
+  const order = await prisma.order.findUnique({
     where: { id },
     include: {
       client: true,
@@ -75,6 +76,7 @@ export async function getOrder(id: string) {
       },
     },
   })
+  return serialize(order)
 }
 
 export async function updateOrderPayment(id: string, paidAmount: string) {
@@ -109,8 +111,10 @@ export async function createOrder(data: {
   items: Array<{ productId: string; quantity: number }>
   notes?: string
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-  if (!data.items?.length) {
-    return { success: false, error: 'Comanda trebuie să conțină cel puțin un produs' }
+  const parsed = orderCreateSchema.safeParse(data)
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Date invalide'
+    return { success: false, error: firstError }
   }
 
   try {
