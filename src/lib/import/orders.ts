@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { validateRows } from './validator'
 import type { ImportValidationError, ImportValidationResult } from './types'
+import { multiplyDecimalStr, addDecimalStrs, sumDecimalStrs, decimalStrGte } from '@/lib/utils/decimal'
 
 export const ORDER_CSV_COLUMNS = [
   'Client',
@@ -165,7 +166,7 @@ export function groupOrderRows(
   productMap: Map<string, string>,
 ): GroupResult {
   const errors: ImportValidationError[] = []
-  const orderMap = new Map<string, { group: Omit<OrderGroup, 'totalAmount' | 'paidAmount' | 'isPaid'>; items: OrderItemData[]; paidSum: number }>()
+  const orderMap = new Map<string, { group: Omit<OrderGroup, 'totalAmount' | 'paidAmount' | 'isPaid'>; items: OrderItemData[]; paidSum: string }>()
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
@@ -192,21 +193,20 @@ export function groupOrderRows(
     }
 
     const key = `${row.client}|${row.orderDate}`
-    const unitPrice = parseFloat(row.unitPrice)
-    const totalPrice = unitPrice * row.quantity
-    const paidAmount = parseFloat(row.paidAmount || '0')
+    const totalPrice = multiplyDecimalStr(row.unitPrice, row.quantity)
+    const paidAmount = row.paidAmount || '0'
 
     const item: OrderItemData = {
       productId,
       quantity: row.quantity,
       unitPrice: row.unitPrice,
-      totalPrice: String(totalPrice),
+      totalPrice,
     }
 
     const existing = orderMap.get(key)
     if (existing) {
       existing.items.push(item)
-      existing.paidSum = existing.paidSum + paidAmount
+      existing.paidSum = addDecimalStrs(existing.paidSum, paidAmount)
     } else {
       orderMap.set(key, {
         group: {
@@ -223,16 +223,13 @@ export function groupOrderRows(
 
   const orders: OrderGroup[] = []
   for (const { group, items, paidSum } of orderMap.values()) {
-    const totalAmount = items.reduce(
-      (sum, item) => sum + parseFloat(item.totalPrice),
-      0,
-    )
+    const totalAmount = sumDecimalStrs(items.map((item) => item.totalPrice))
 
     orders.push({
       ...group,
-      totalAmount: String(totalAmount),
-      paidAmount: String(paidSum),
-      isPaid: paidSum >= totalAmount,
+      totalAmount,
+      paidAmount: paidSum,
+      isPaid: decimalStrGte(paidSum, totalAmount),
       items,
     })
   }

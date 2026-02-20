@@ -372,7 +372,7 @@ describe('groupOrderRows', () => {
     const result = groupOrderRows(rows, clientMap, productMap)
 
     // 2 * 100 + 3 * 50 = 350
-    expect(result.orders[0].totalAmount).toBe('350')
+    expect(result.orders[0].totalAmount).toBe('350.00')
   })
 
   it('skips rows with unmatched client and logs error', () => {
@@ -440,6 +440,7 @@ describe('groupOrderRows', () => {
     const result = groupOrderRows(rows, clientMap, productMap)
 
     expect(result.orders[0].paidAmount).toBe('200')
+    expect(result.orders[0].totalAmount).toBe('200.00')
     expect(result.orders[0].isPaid).toBe(true)
   })
 
@@ -473,7 +474,7 @@ describe('groupOrderRows', () => {
 
     const result = groupOrderRows(rows, clientMap, productMap)
 
-    expect(result.orders[0].paidAmount).toBe('300')
+    expect(result.orders[0].paidAmount).toBe('300.00')
     expect(result.orders[0].isPaid).toBe(true)
   })
 })
