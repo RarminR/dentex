@@ -37,7 +37,16 @@ export interface OfferListItem {
   isEdited: boolean
 }
 
-export async function generateOffer(clientId: string): Promise<OfferResult> {
+export async function getUpsellProducts() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true, role: 'UPSELL' },
+    select: { id: true, name: true, sku: true, category: true, unitPrice: true },
+    orderBy: { name: 'asc' },
+  })
+  return serialize(products)
+}
+
+export async function generateOffer(clientId: string, selectedUpsellIds?: string[]): Promise<OfferResult> {
   const client = await prisma.client.findUnique({
     where: { id: clientId },
     select: { id: true, companyName: true, discountPercent: true },
@@ -57,7 +66,7 @@ export async function generateOffer(clientId: string): Promise<OfferResult> {
   const orderCount = await prisma.order.count({ where: { clientId } })
   const clientAvgOrderSize = orderCount > 0 ? orderCount : 0
 
-  const bundle = buildBundle(scoredProducts, config, clientAvgOrderSize)
+  const bundle = buildBundle(scoredProducts, config, clientAvgOrderSize, selectedUpsellIds)
   bundle.clientId = clientId
 
   let aiInsight: string | null = null

@@ -55,56 +55,68 @@ function selectWithCategoryCap(
 export function buildBundle(
   scoredProducts: ScoredProduct[],
   config: EngineConfig,
-  clientAvgOrderSize: number
+  clientAvgOrderSize: number,
+  selectedUpsellIds?: string[]
 ): GeneratedOffer {
+  const anchorProducts = scoredProducts.filter((p) => p.role === 'anchor')
+  const upsellProducts = scoredProducts.filter((p) => p.role === 'upsell')
+
   const configuredBundleSize =
     clientAvgOrderSize > 0
       ? clamp(Math.round(clientAvgOrderSize), config.minBundleSize, config.maxBundleSize)
       : config.minBundleSize
 
-  const bundleSize = Math.min(configuredBundleSize, scoredProducts.length)
-  const anchorCount = Math.round(bundleSize * config.anchorRatio)
-  const upsellCount = bundleSize - anchorCount
-
+  const jitter = 0.15
   const categoryCounts = new Map<string, number>()
 
-  const jitter = 0.15
-
   const anchorRanked = sortByAffinity(
-    scoredProducts,
+    anchorProducts,
     (product) => product.scoreBreakdown.clientFrequency + product.scoreBreakdown.globalPopularity,
     jitter
+  )
+
+  const anchorCount = Math.min(
+    Math.round(configuredBundleSize * config.anchorRatio),
+    anchorRanked.length
   )
 
   const selectedAnchors = selectWithCategoryCap(
     anchorRanked,
     anchorCount,
-    bundleSize,
+    configuredBundleSize,
     config.maxCategoryPercent,
     categoryCounts
   )
 
-  const selectedAnchorIds = new Set(selectedAnchors.map((item) => item.productId))
-  const upsellCandidates = scoredProducts.filter((item) => !selectedAnchorIds.has(item.productId))
-
-  const upsellRanked = sortByAffinity(
-    upsellCandidates,
-    (product) => product.scoreBreakdown.slowMoverPush + product.scoreBreakdown.margin,
-    jitter
-  )
-
-  const selectedUpsells = selectWithCategoryCap(
-    upsellRanked,
-    upsellCount,
-    bundleSize,
-    config.maxCategoryPercent,
-    categoryCounts
-  )
+  let selectedUpsells: ScoredProduct[]
+  if (selectedUpsellIds && selectedUpsellIds.length > 0) {
+    const upsellIdSet = new Set(selectedUpsellIds)
+    selectedUpsells = upsellProducts.filter((p) => upsellIdSet.has(p.productId))
+  } else {
+    const upsellCount = Math.min(
+      configuredBundleSize - selectedAnchors.length,
+      upsellProducts.length
+    )
+    const upsellRanked = sortByAffinity(
+      upsellProducts,
+      (product) => product.scoreBreakdown.slowMoverPush + product.scoreBreakdown.margin,
+      jitter
+    )
+    selectedUpsells = selectWithCategoryCap(
+      upsellRanked,
+      upsellCount,
+      configuredBundleSize,
+      config.maxCategoryPercent,
+      categoryCounts
+    )
+  }
 
   const bundleItems = [
     ...selectedAnchors.map((item) => ({ ...item, role: 'anchor' as const })),
     ...selectedUpsells.map((item) => ({ ...item, role: 'upsell' as const })),
   ]
+
+  const bundleSize = bundleItems.length
 
   const totalValue = sumDecimals(bundleItems.map((item) => item.effectivePrice))
 

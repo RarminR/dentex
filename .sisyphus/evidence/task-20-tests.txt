@@ -1,0 +1,36 @@
+Task 20 Evidence - Offer Engine Scorer
+Date: 2026-02-18
+
+1) TDD RED Phase
+Command:
+  npm test src/lib/engine/scorer.test.ts
+
+Observed failure before implementation:
+  Error: Failed to resolve import "./scorer" from "src/lib/engine/scorer.test.ts". Does the file exist?
+  Test Files: 1 failed
+
+2) Focused GREEN Verification
+Command:
+  npm test src/lib/engine/scorer.test.ts
+
+Result:
+  src/lib/engine/scorer.test.ts (5 tests) passed
+  Test Files: 1 passed
+  Tests: 5 passed
+
+3) Full Suite Verification
+Command:
+  npm test
+
+Result:
+  Test Files: 13 passed
+  Tests: 145 passed
+
+4) LSP Diagnostics
+Files checked:
+  - src/lib/engine/scorer.ts
+  - src/lib/engine/scorer.test.ts
+  - src/lib/engine/index.ts
+
+Result:
+  No diagnostics found for all checked files.

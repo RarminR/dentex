@@ -15,6 +15,7 @@ function makeProducts(count: number) {
     unitPrice: d(50 + Math.random() * 450),
     costPrice: d(20 + Math.random() * 200),
     stockQty: 50 + Math.floor(Math.random() * 200),
+    role: i < Math.round(count * 0.6) ? 'ANCHOR' : 'UPSELL',
     isActive: true,
     createdAt: new Date('2025-06-01'),
     updatedAt: new Date('2025-06-01'),

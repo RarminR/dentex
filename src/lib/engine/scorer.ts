@@ -32,6 +32,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
         name: true,
         category: true,
         sku: true,
+        role: true,
         unitPrice: true,
         costPrice: true,
       },
@@ -146,7 +147,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
         slowMoverPush,
       },
       suggestedQuantity,
-      role: 'anchor',
+      role: product.role === 'UPSELL' ? 'upsell' : 'anchor',
     }
   })
 

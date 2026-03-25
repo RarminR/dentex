@@ -27,6 +27,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
             name: product.name,
             sku: product.sku,
             category: product.category,
+            role: product.role,
             description: product.description,
             unitPrice: product.unitPrice.toString(),
             costPrice: product.costPrice.toString(),

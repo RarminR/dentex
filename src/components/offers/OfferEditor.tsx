@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { OfferDisplay } from './OfferDisplay'
-import { generateOffer, updateOffer } from '@/lib/actions/offers'
+import { updateOffer } from '@/lib/actions/offers'
 import type { OfferView } from '@/lib/actions/offers'
 
 interface EditableItem {
@@ -101,35 +101,7 @@ export function OfferEditor({ initialOffer }: OfferEditorProps) {
   }
 
   function handleRegenerate() {
-    setFeedback(null)
-    startTransition(async () => {
-      const result = await generateOffer(offer.clientId)
-      if (result.success && result.offerId) {
-        router.refresh()
-        if (result.offer) {
-          const newOffer: OfferView = {
-            id: result.offerId,
-            clientId: offer.clientId,
-            clientName: offer.clientName,
-            items: result.offer.items,
-            totalValue: result.offer.totalValue.toString(),
-            totalMargin: result.offer.totalMargin.toString(),
-            isEdited: false,
-            aiInsight: result.offer.aiInsight ?? null,
-            pitchNote: result.offer.pitchNote ?? null,
-            generatedAt: result.offer.generatedAt,
-            createdAt: new Date(),
-            engineConfig: JSON.stringify(result.offer.engineConfig),
-          }
-          setOffer(newOffer)
-          setEditedItems(serializeItems(newOffer.items))
-          setIsEditing(false)
-          setFeedback({ type: 'success', message: 'Ofert\u0103 regenerat\u0103 cu succes!' })
-        }
-      } else {
-        setFeedback({ type: 'error', message: result.error ?? 'Eroare la regenerare' })
-      }
-    })
+    router.push(`/offers/${offer.clientId}`)
   }
 
   return (

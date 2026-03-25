@@ -1,0 +1,175 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]: DenteX
+      - navigation [ref=e6]:
+        - list [ref=e7]:
+          - listitem [ref=e8]:
+            - link "📊 Panou Principal" [ref=e9] [cursor=pointer]:
+              - /url: /dashboard
+              - generic [ref=e10]: 📊
+              - generic [ref=e11]: Panou Principal
+          - listitem [ref=e12]:
+            - link "👥 Clienți" [ref=e13] [cursor=pointer]:
+              - /url: /clients
+              - generic [ref=e14]: 👥
+              - generic [ref=e15]: Clienți
+          - listitem [ref=e16]:
+            - link "📦 Produse" [ref=e17] [cursor=pointer]:
+              - /url: /products
+              - generic [ref=e18]: 📦
+              - generic [ref=e19]: Produse
+          - listitem [ref=e20]:
+            - link "📋 Comenzi" [ref=e21] [cursor=pointer]:
+              - /url: /orders
+              - generic [ref=e22]: 📋
+              - generic [ref=e23]: Comenzi
+          - listitem [ref=e24]:
+            - link "📈 Rapoarte" [ref=e25] [cursor=pointer]:
+              - /url: /reports
+              - generic [ref=e26]: 📈
+              - generic [ref=e27]: Rapoarte
+          - listitem [ref=e28]:
+            - link "⚙️ Setări" [ref=e29] [cursor=pointer]:
+              - /url: /settings
+              - generic [ref=e30]: ⚙️
+              - generic [ref=e31]: Setări
+    - generic [ref=e32]:
+      - banner [ref=e110]:
+        - heading "Clienți" [level=1] [ref=e111]
+        - generic [ref=e112]:
+          - generic [ref=e113]: Administrator
+          - button "Deconectare" [ref=e115]
+      - main [ref=e116]:
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - textbox "Caută..." [ref=e119]
+            - combobox [ref=e120]:
+              - option "Toate Orașele" [selected]
+              - option "București"
+              - option "Cluj-Napoca"
+              - option "Constanța"
+              - option "Iași"
+              - option "Str. Test 1"
+              - option "Timișoara"
+            - link "Adaugă Client" [ref=e122] [cursor=pointer]:
+              - /url: /clients/new
+          - generic [ref=e123]:
+            - table [ref=e125]:
+              - rowgroup [ref=e126]:
+                - row "Companie Persoană Contact Oraș Discount % Status" [ref=e127]:
+                  - columnheader "Companie" [ref=e128]
+                  - columnheader "Persoană Contact" [ref=e129]
+                  - columnheader "Oraș" [ref=e130]
+                  - columnheader "Discount %" [ref=e131]
+                  - columnheader "Status" [ref=e132]
+              - rowgroup [ref=e133]:
+                - row "Cabinet Dr. Radu Dr. Bogdan Radu București 8,00% Activ" [ref=e134]:
+                  - cell "Cabinet Dr. Radu" [ref=e135]:
+                    - link "Cabinet Dr. Radu" [ref=e136] [cursor=pointer]:
+                      - /url: /clients/cmlqsiwhc000rgp2l0h81bqng
+                  - cell "Dr. Bogdan Radu" [ref=e137]
+                  - cell "București" [ref=e138]
+                  - cell "8,00%" [ref=e139]
+                  - cell "Activ" [ref=e140]:
+                    - generic [ref=e141]: Activ
+                - row "Cabinet Dr. Radu Dr. Bogdan Radu București 8,00% Activ" [ref=e142]:
+                  - cell "Cabinet Dr. Radu" [ref=e143]:
+                    - link "Cabinet Dr. Radu" [ref=e144] [cursor=pointer]:
+                      - /url: /clients/cmlqwlo7u000rgdp9k8kf78nh
+                  - cell "Dr. Bogdan Radu" [ref=e145]
+                  - cell "București" [ref=e146]
+                  - cell "8,00%" [ref=e147]
+                  - cell "Activ" [ref=e148]:
+                    - generic [ref=e149]: Activ
+                - row "Cabinet Dr. Radu Dr. Bogdan Radu București 8,00% Activ" [ref=e150]:
+                  - cell "Cabinet Dr. Radu" [ref=e151]:
+                    - link "Cabinet Dr. Radu" [ref=e152] [cursor=pointer]:
+                      - /url: /clients/cmlun1rej000rnaa2wquyuzkv
+                  - cell "Dr. Bogdan Radu" [ref=e153]
+                  - cell "București" [ref=e154]
+                  - cell "8,00%" [ref=e155]
+                  - cell "Activ" [ref=e156]:
+                    - generic [ref=e157]: Activ
+                - row "Cabinet Stomatologic Ionescu Dr. Maria Ionescu Cluj-Napoca 10,00% Activ" [ref=e158]:
+                  - cell "Cabinet Stomatologic Ionescu" [ref=e159]:
+                    - link "Cabinet Stomatologic Ionescu" [ref=e160] [cursor=pointer]:
+                      - /url: /clients/cmlqsiwhc000ngp2l1uwv4urd
+                  - cell "Dr. Maria Ionescu" [ref=e161]
+                  - cell "Cluj-Napoca" [ref=e162]
+                  - cell "10,00%" [ref=e163]
+                  - cell "Activ" [ref=e164]:
+                    - generic [ref=e165]: Activ
+                - row "Cabinet Stomatologic Ionescu Dr. Maria Ionescu Cluj-Napoca 10,00% Activ" [ref=e166]:
+                  - cell "Cabinet Stomatologic Ionescu" [ref=e167]:
+                    - link "Cabinet Stomatologic Ionescu" [ref=e168] [cursor=pointer]:
+                      - /url: /clients/cmlqwlo7u000ngdp9qshi06hz
+                  - cell "Dr. Maria Ionescu" [ref=e169]
+                  - cell "Cluj-Napoca" [ref=e170]
+                  - cell "10,00%" [ref=e171]
+                  - cell "Activ" [ref=e172]:
+                    - generic [ref=e173]: Activ
+                - row "Cabinet Stomatologic Ionescu Dr. Maria Ionescu Cluj-Napoca 10,00% Activ" [ref=e174]:
+                  - cell "Cabinet Stomatologic Ionescu" [ref=e175]:
+                    - link "Cabinet Stomatologic Ionescu" [ref=e176] [cursor=pointer]:
+                      - /url: /clients/cmlun1rej000nnaa2woio1edv
+                  - cell "Dr. Maria Ionescu" [ref=e177]
+                  - cell "Cluj-Napoca" [ref=e178]
+                  - cell "10,00%" [ref=e179]
+                  - cell "Activ" [ref=e180]:
+                    - generic [ref=e181]: Activ
+                - row "Clinica Dr. Popescu Dr. Ion Popescu București 15,00% Activ" [ref=e182]:
+                  - cell "Clinica Dr. Popescu" [ref=e183]:
+                    - link "Clinica Dr. Popescu" [ref=e184] [cursor=pointer]:
+                      - /url: /clients/cmlqsiwhc000mgp2lu92o6b97
+                  - cell "Dr. Ion Popescu" [ref=e185]
+                  - cell "București" [ref=e186]
+                  - cell "15,00%" [ref=e187]
+                  - cell "Activ" [ref=e188]:
+                    - generic [ref=e189]: Activ
+                - row "Clinica Dr. Popescu Dr. Ion Popescu București 15,00% Activ" [ref=e190]:
+                  - cell "Clinica Dr. Popescu" [ref=e191]:
+                    - link "Clinica Dr. Popescu" [ref=e192] [cursor=pointer]:
+                      - /url: /clients/cmlqwlo7u000mgdp9f0c1zgyx
+                  - cell "Dr. Ion Popescu" [ref=e193]
+                  - cell "București" [ref=e194]
+                  - cell "15,00%" [ref=e195]
+                  - cell "Activ" [ref=e196]:
+                    - generic [ref=e197]: Activ
+                - row "Clinica Dr. Popescu Dr. Ion Popescu București 15,00% Activ" [ref=e198]:
+                  - cell "Clinica Dr. Popescu" [ref=e199]:
+                    - link "Clinica Dr. Popescu" [ref=e200] [cursor=pointer]:
+                      - /url: /clients/cmlun1rej000mnaa2gms0r98f
+                  - cell "Dr. Ion Popescu" [ref=e201]
+                  - cell "București" [ref=e202]
+                  - cell "15,00%" [ref=e203]
+                  - cell "Activ" [ref=e204]:
+                    - generic [ref=e205]: Activ
+                - row "Clinica E2E 1771350494844 Dr. Test E2E Str. Test 1 12,00% Activ" [ref=e206]:
+                  - cell "Clinica E2E 1771350494844" [ref=e207]:
+                    - link "Clinica E2E 1771350494844" [ref=e208] [cursor=pointer]:
+                      - /url: /clients/cmlqwclbr0005t719lzp1jsjy
+                  - cell "Dr. Test E2E" [ref=e209]
+                  - cell "Str. Test 1" [ref=e210]
+                  - cell "12,00%" [ref=e211]
+                  - cell "Activ" [ref=e212]:
+                    - generic [ref=e213]: Activ
+            - generic [ref=e214]:
+              - paragraph [ref=e215]: Afișare 1–10 din 21 rezultate
+              - generic [ref=e216]:
+                - button "Anterior" [disabled] [ref=e217]
+                - button "Următorul" [ref=e218]
+  - generic [ref=e95] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e96]:
+      - img [ref=e97]
+    - generic [ref=e100]:
+      - button "Open issues overlay" [ref=e101]:
+        - generic [ref=e219]:
+          - generic [ref=e220]: "1"
+          - generic [ref=e221]: "2"
+        - generic [ref=e105]:
+          - text: Issue
+          - generic [ref=e222]: s
+      - button "Collapse issues badge" [ref=e106]:
+        - img [ref=e107]
+  - alert [ref=e109]

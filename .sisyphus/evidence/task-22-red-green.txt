@@ -1,0 +1,30 @@
+
+RED PHASE
+
+Command:
+npm test src/lib/engine/ai-enhancer.test.ts
+
+Result:
+- FAIL (expected)
+- Reason: Cannot resolve import ./ai-enhancer (file missing)
+
+Key failure line:
+Error: Failed to resolve import "./ai-enhancer" from "src/lib/engine/ai-enhancer.test.ts". Does the file exist?
+
+
+GREEN PHASE
+
+Command:
+npm test src/lib/engine/ai-enhancer.test.ts
+
+Result:
+- PASS
+- Test Files: 1 passed
+- Tests: 5 passed
+
+Covered scenarios:
+1) valid response parsed correctly
+2) timeout path returns null
+3) malformed JSON returns null
+4) API error returns null
+5) missing OPENAI_API_KEY returns null immediately

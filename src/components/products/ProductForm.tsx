@@ -18,6 +18,7 @@ interface ProductFormProps {
     name: string
     sku: string
     category: string
+    role: string
     description: string | null
     unitPrice: string
     costPrice: string
@@ -42,6 +43,7 @@ export function ProductForm({ product }: ProductFormProps) {
       name: formData.get('name') as string,
       sku: formData.get('sku') as string,
       category: formData.get('category') as ProductCreateInput['category'],
+      role: (formData.get('role') as ProductCreateInput['role']) ?? 'ANCHOR',
       description: (formData.get('description') as string) || null,
       unitPrice: formData.get('unitPrice') as string,
       costPrice: formData.get('costPrice') as string,
@@ -87,6 +89,18 @@ export function ProductForm({ product }: ProductFormProps) {
                   {RO.products.categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+
+            <FormField label="Rol Ofertă" error={errors.role} required>
+              <Select name="role" defaultValue={product?.role ?? 'ANCHOR'}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Rol Ofertă" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ANCHOR">Ancoră</SelectItem>
+                  <SelectItem value="UPSELL">Upsell</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>

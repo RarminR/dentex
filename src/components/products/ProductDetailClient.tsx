@@ -80,6 +80,21 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               <dt className="text-gray-500 font-medium">{RO.products.category}</dt>
               <dd className="mt-1">{product.category}</dd>
             </div>
+            <div>
+              <dt className="text-gray-500 font-medium">Rol Ofertă</dt>
+              <dd className="mt-1">
+                <Badge
+                  variant="outline"
+                  className={
+                    product.role === 'ANCHOR'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                      : 'border-orange-300 bg-orange-50 text-orange-700'
+                  }
+                >
+                  {product.role === 'ANCHOR' ? 'Ancoră' : 'Upsell'}
+                </Badge>
+              </dd>
+            </div>
             {product.description && (
               <div className="md:col-span-2">
                 <dt className="text-gray-500 font-medium">{RO.products.description}</dt>

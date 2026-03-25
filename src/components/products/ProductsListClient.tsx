@@ -87,6 +87,22 @@ export function ProductsListClient({
       cell: (row) => row.category,
     },
     {
+      key: 'role',
+      header: 'Rol',
+      cell: (row) => (
+        <Badge
+          variant="outline"
+          className={
+            row.role === 'ANCHOR'
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+              : 'border-orange-300 bg-orange-50 text-orange-700'
+          }
+        >
+          {row.role === 'ANCHOR' ? 'Ancoră' : 'Upsell'}
+        </Badge>
+      ),
+    },
+    {
       key: 'unitPrice',
       header: RO.products.sellPrice,
       cell: (row) => formatCurrency(row.unitPrice.toString()),

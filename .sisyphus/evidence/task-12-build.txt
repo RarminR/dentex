@@ -1,0 +1,11 @@
+> dentex@0.1.0 build
+> next build
+
+Compiled successfully.
+TypeScript check completed during build.
+Static pages generated successfully.
+
+Result: PASS
+
+Note: Existing Next.js warning still present in project:
+- "middleware" file convention is deprecated; use "proxy" instead.

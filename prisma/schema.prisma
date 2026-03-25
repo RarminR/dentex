@@ -23,6 +23,7 @@ model Product {
   name        String
   sku         String      @unique
   category    String
+  role        String      @default("ANCHOR")
   description String?
   unitPrice   Decimal
   costPrice   Decimal

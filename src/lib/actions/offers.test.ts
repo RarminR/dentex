@@ -204,7 +204,8 @@ describe('generateOffer', () => {
     expect(mockBuildBundle).toHaveBeenCalledWith(
       expect.any(Array),
       defaultConfig,
-      expect.any(Number)
+      expect.any(Number),
+      undefined
     )
   })
 })

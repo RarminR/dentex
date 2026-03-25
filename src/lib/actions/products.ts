@@ -77,6 +77,7 @@ export async function createProduct(input: ProductCreateInput): Promise<ActionRe
         name: parsed.data.name,
         sku: parsed.data.sku,
         category: parsed.data.category,
+        role: parsed.data.role ?? 'ANCHOR',
         description: parsed.data.description ?? null,
         unitPrice: new Prisma.Decimal(parsed.data.unitPrice),
         costPrice: new Prisma.Decimal(parsed.data.costPrice),
@@ -112,6 +113,7 @@ export async function updateProduct(id: string, input: ProductUpdateInput): Prom
   if (parsed.data.name !== undefined) updateData.name = parsed.data.name
   if (parsed.data.sku !== undefined) updateData.sku = parsed.data.sku
   if (parsed.data.category !== undefined) updateData.category = parsed.data.category
+  if (parsed.data.role !== undefined) updateData.role = parsed.data.role
   if (parsed.data.description !== undefined) updateData.description = parsed.data.description ?? null
   if (parsed.data.unitPrice !== undefined) updateData.unitPrice = new Prisma.Decimal(parsed.data.unitPrice)
   if (parsed.data.costPrice !== undefined) updateData.costPrice = new Prisma.Decimal(parsed.data.costPrice)

@@ -1,0 +1,12 @@
+LSP diagnostics on changed files
+===============================
+
+Checked files:
+- src/lib/import/parser.ts
+- src/lib/import/validator.ts
+- src/lib/import/types.ts
+- src/lib/import/parser.test.ts
+- src/lib/import/validator.test.ts
+- src/components/import/CsvUploader.tsx
+
+Result: No diagnostics found on all listed files.

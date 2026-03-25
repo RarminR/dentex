@@ -1,12 +1,17 @@
 import { z } from 'zod'
 import { RO } from '@/lib/constants/ro'
 
+const productRoles = ['ANCHOR', 'UPSELL'] as const
+
 export const productCreateSchema = z.object({
   name: z.string().min(1, { error: 'Numele este obligatoriu' }).max(200),
   sku: z.string().min(1, { error: 'Codul SKU este obligatoriu' }).max(50),
   category: z.enum(RO.products.categories, {
     error: 'Categoria este obligatorie',
   }),
+  role: z.enum(productRoles, {
+    error: 'Rolul este obligatoriu',
+  }).default('ANCHOR'),
   description: z.string().max(1000).optional().nullable(),
   unitPrice: z
     .string()

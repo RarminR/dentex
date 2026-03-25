@@ -58,6 +58,7 @@ describe('buildBundle', () => {
       return makeScoredProduct({
         productId: `p-${i + 1}`,
         category,
+        role: i < 7 ? 'anchor' : 'upsell',
         effectivePrice: d(100 + i),
         marginPercent: d(20 + i),
         scoreBreakdown: {
@@ -83,6 +84,7 @@ describe('buildBundle', () => {
       makeScoredProduct({
         productId: `p-${i + 1}`,
         category: i % 3 === 0 ? 'Consumabile' : i % 3 === 1 ? 'Instrumente' : 'Implanturi',
+        role: i < 6 ? 'anchor' : 'upsell',
         scoreBreakdown: {
           clientFrequency: 1 - i * 0.05,
           globalPopularity: 0.5,
@@ -106,36 +108,43 @@ describe('buildBundle', () => {
       makeScoredProduct({
         productId: 'c1',
         category: 'Consumabile',
+        role: 'anchor',
         scoreBreakdown: { clientFrequency: 1, globalPopularity: 1, margin: 0.2, recency: 0, slowMoverPush: 0.1 },
       }),
       makeScoredProduct({
         productId: 'c2',
         category: 'Consumabile',
+        role: 'anchor',
         scoreBreakdown: { clientFrequency: 0.95, globalPopularity: 0.95, margin: 0.2, recency: 0, slowMoverPush: 0.1 },
       }),
       makeScoredProduct({
         productId: 'c3',
         category: 'Consumabile',
+        role: 'upsell',
         scoreBreakdown: { clientFrequency: 0.9, globalPopularity: 0.9, margin: 0.2, recency: 0, slowMoverPush: 0.1 },
       }),
       makeScoredProduct({
         productId: 'i1',
         category: 'Instrumente',
+        role: 'anchor',
         scoreBreakdown: { clientFrequency: 0.6, globalPopularity: 0.6, margin: 0.8, recency: 0, slowMoverPush: 0.9 },
       }),
       makeScoredProduct({
         productId: 'i2',
         category: 'Instrumente',
+        role: 'upsell',
         scoreBreakdown: { clientFrequency: 0.55, globalPopularity: 0.55, margin: 0.7, recency: 0, slowMoverPush: 0.8 },
       }),
       makeScoredProduct({
         productId: 'm1',
         category: 'Materiale Compozite',
+        role: 'upsell',
         scoreBreakdown: { clientFrequency: 0.5, globalPopularity: 0.5, margin: 0.6, recency: 0, slowMoverPush: 0.7 },
       }),
       makeScoredProduct({
         productId: 'imp1',
         category: 'Implanturi',
+        role: 'upsell',
         scoreBreakdown: { clientFrequency: 0.45, globalPopularity: 0.45, margin: 0.5, recency: 0, slowMoverPush: 0.6 },
       }),
     ]
@@ -157,6 +166,7 @@ describe('buildBundle', () => {
       makeScoredProduct({
         productId: 'a1',
         category: 'Consumabile',
+        role: 'anchor',
         effectivePrice: d('100'),
         marginPercent: d('10'),
         scoreBreakdown: { clientFrequency: 1, globalPopularity: 1, margin: 0.2, recency: 0, slowMoverPush: 0.1 },
@@ -164,27 +174,31 @@ describe('buildBundle', () => {
       makeScoredProduct({
         productId: 'a2',
         category: 'Instrumente',
+        role: 'anchor',
         effectivePrice: d('200'),
         marginPercent: d('30'),
         scoreBreakdown: { clientFrequency: 0.9, globalPopularity: 0.9, margin: 0.3, recency: 0, slowMoverPush: 0.2 },
       }),
       makeScoredProduct({
-        productId: 'u1',
+        productId: 'a3',
         category: 'Implanturi',
+        role: 'anchor',
         effectivePrice: d('300'),
         marginPercent: d('50'),
-        scoreBreakdown: { clientFrequency: 0.1, globalPopularity: 0.1, margin: 1, recency: 0, slowMoverPush: 1 },
+        scoreBreakdown: { clientFrequency: 0.8, globalPopularity: 0.8, margin: 0.4, recency: 0, slowMoverPush: 0.3 },
       }),
       makeScoredProduct({
-        productId: 'u2',
+        productId: 'u1',
         category: 'Materiale Compozite',
+        role: 'upsell',
         effectivePrice: d('400'),
         marginPercent: d('20'),
         scoreBreakdown: { clientFrequency: 0.05, globalPopularity: 0.05, margin: 0.9, recency: 0, slowMoverPush: 0.9 },
       }),
       makeScoredProduct({
-        productId: 'u3',
+        productId: 'u2',
         category: 'Consumabile',
+        role: 'upsell',
         effectivePrice: d('500'),
         marginPercent: d('40'),
         scoreBreakdown: { clientFrequency: 0.04, globalPopularity: 0.04, margin: 0.8, recency: 0, slowMoverPush: 0.8 },
@@ -202,6 +216,7 @@ describe('buildBundle', () => {
       makeScoredProduct({
         productId: `p-${i + 1}`,
         category: i % 4 === 0 ? 'Consumabile' : i % 4 === 1 ? 'Instrumente' : i % 4 === 2 ? 'Implanturi' : 'Materiale Compozite',
+        role: i < 6 ? 'anchor' : 'upsell',
         scoreBreakdown: {
           clientFrequency: 1 - i * 0.03,
           globalPopularity: 0.8 - i * 0.03,
