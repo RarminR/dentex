@@ -25,7 +25,7 @@ export default async function OfferPage({ params }: OfferPageProps) {
         <UpsellSelector
           clientId={clientId}
           clientName={client.companyName}
-          upsellProducts={upsellProducts}
+          upsellProducts={upsellProducts as unknown as { id: string; name: string; sku: string; category: string | null; unitPrice: string }[]}
         />
       </PageWrapper>
     </>

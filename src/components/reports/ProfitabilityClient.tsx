@@ -109,7 +109,7 @@ export function ProfitabilityClient({ data }: { data: ProfitabilityRow[] }) {
           </Select>
         </div>
         <p className="text-sm text-gray-500">
-          Valorile sunt f\u0103r\u0103 TVA (+19% TVA)
+          Valorile sunt f\u0103r\u0103 TVA (+21% TVA)
         </p>
       </div>
 

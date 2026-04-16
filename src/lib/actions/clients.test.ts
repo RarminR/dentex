@@ -26,12 +26,12 @@ describe('clientCreateSchema validation', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects empty contact person', () => {
+  it('accepts empty contact person (optional)', () => {
     const result = clientCreateSchema.safeParse({
       companyName: 'Test SRL',
       contactPerson: '',
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 
   it('rejects invalid email', () => {
@@ -245,12 +245,12 @@ describe('getClientFinancials', () => {
       {
         quantity: 10,
         totalPrice: d('900.00'),
-        product: { costPrice: d('50.00') },
+        product: { acquisitionPrice: d('50.00') },
       },
       {
         quantity: 5,
         totalPrice: d('900.00'),
-        product: { costPrice: d('120.00') },
+        product: { acquisitionPrice: d('120.00') },
       },
     ] as never)
 

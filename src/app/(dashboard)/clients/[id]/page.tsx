@@ -55,7 +55,7 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
                 <CardTitle>{RO.clients.contact}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p><span className="text-gray-500">{RO.clients.contact}:</span> {client.contactPerson}</p>
+                {client.contactPerson && <p><span className="text-gray-500">{RO.clients.contact}:</span> {client.contactPerson}</p>}
                 {client.email && <p><span className="text-gray-500">{RO.clients.email}:</span> {client.email}</p>}
                 {client.phone && <p><span className="text-gray-500">{RO.clients.phone}:</span> {client.phone}</p>}
                 {client.city && <p><span className="text-gray-500">{RO.clients.city}:</span> {client.city}</p>}

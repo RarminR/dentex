@@ -23,11 +23,11 @@ export interface EngineConfig {
 export interface ScoredProduct {
   productId: string
   name: string
-  category: string
+  category: string | null
   sku: string
   unitPrice: Prisma.Decimal
   effectivePrice: Prisma.Decimal   // unit price after client discount
-  costPrice: Prisma.Decimal
+  acquisitionPrice: Prisma.Decimal
   marginPercent: Prisma.Decimal
   compositeScore: number            // 0-1 combined score
   scoreBreakdown: {

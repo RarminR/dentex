@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
-import { RO } from '@/lib/constants/ro'
 import { parseRomanianNumber, type ParseCsvOptions } from './parser'
 import { validateRows } from './validator'
 import type { ImportValidationError } from './types'
@@ -12,7 +11,7 @@ export const PRODUCT_CSV_COLUMNS: Record<string, string> = {
   'SKU': 'sku',
   'Categorie': 'category',
   'Preț Vânzare': 'unitPrice',
-  'Preț Achiziție': 'costPrice',
+  'Preț Achiziție': 'acquisitionPrice',
   'Stoc': 'stockQty',
   'Descriere': 'description',
 }
@@ -20,11 +19,11 @@ export const PRODUCT_CSV_COLUMNS: Record<string, string> = {
 export type ProductImportRow = {
   name: string
   sku: string
-  category: string
+  category?: string | null
   unitPrice: string
-  costPrice: string
+  acquisitionPrice?: string
   stockQty: number
-  description: string | null
+  description?: string | null
 }
 
 export type ProductImportResult = {
@@ -36,25 +35,24 @@ export type ProductImportResult = {
 const productImportRowSchema = z.object({
   name: z.string().min(1, { error: 'Numele este obligatoriu' }).max(200),
   sku: z.string().min(1, { error: 'Codul SKU este obligatoriu' }).max(50),
-  category: z.enum(RO.products.categories, {
-    error: 'Categoria este obligatorie',
-  }),
+  category: z.string().optional().nullable(),
   unitPrice: z
     .string()
     .min(1, { error: 'Prețul de vânzare este obligatoriu' })
     .refine((v) => !isNaN(Number(v)) && Number(v) > 0, {
       error: 'Prețul trebuie să fie pozitiv',
     }),
-  costPrice: z
+  acquisitionPrice: z
     .string()
-    .min(1, { error: 'Prețul de achiziție este obligatoriu' })
-    .refine((v) => !isNaN(Number(v)) && Number(v) > 0, {
+    .optional()
+    .refine((v) => !v || (!isNaN(Number(v)) && Number(v) >= 0), {
       error: 'Prețul trebuie să fie pozitiv',
     }),
   stockQty: z
     .number({ error: 'Stocul trebuie să fie un număr' })
     .int({ error: 'Stocul trebuie să fie un număr întreg' })
-    .min(0, { error: 'Stocul nu poate fi negativ' }),
+    .min(0, { error: 'Stocul nu poate fi negativ' })
+    .default(0),
   description: z.string().max(1000).nullable().default(null),
 })
 
@@ -72,7 +70,7 @@ export function getProductParseOptions(): ParseCsvOptions<Record<string, unknown
         const num = parseRomanianNumber(value)
         return num !== null ? String(num) : value
       },
-      'Preț Achiziție': (value) => {
+      'Preț Achiziție': (value: string) => {
         const num = parseRomanianNumber(value)
         return num !== null ? String(num) : value
       },
@@ -119,18 +117,18 @@ export async function processProductImport(
           create: {
             name: row.name,
             sku: row.sku,
-            category: row.category,
+            category: row.category ?? null,
             description: row.description ?? null,
             unitPrice: new Prisma.Decimal(row.unitPrice),
-            costPrice: new Prisma.Decimal(row.costPrice),
+            acquisitionPrice: row.acquisitionPrice ? new Prisma.Decimal(row.acquisitionPrice) : new Prisma.Decimal(0),
             stockQty: row.stockQty,
           },
           update: {
             name: row.name,
-            category: row.category,
+            category: row.category ?? null,
             description: row.description ?? null,
             unitPrice: new Prisma.Decimal(row.unitPrice),
-            costPrice: new Prisma.Decimal(row.costPrice),
+            acquisitionPrice: row.acquisitionPrice ? new Prisma.Decimal(row.acquisitionPrice) : undefined,
             stockQty: row.stockQty,
           },
         })

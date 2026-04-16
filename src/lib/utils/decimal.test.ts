@@ -3,17 +3,17 @@ import { Decimal } from '@prisma/client/runtime/library'
 import { calculateMargin, applyDiscount, sumDecimals } from './decimal'
 
 describe('calculateMargin', () => {
-  it('calculates 40% margin when unitPrice=150 and costPrice=90', () => {
+  it('calculates 40% margin when unitPrice=150 and acquisitionPrice=90', () => {
     const result = calculateMargin(new Decimal(150), new Decimal(90))
     expect(result.equals(new Decimal(40))).toBe(true)
   })
 
-  it('calculates 0% margin when unitPrice equals costPrice', () => {
+  it('calculates 0% margin when unitPrice equals acquisitionPrice', () => {
     const result = calculateMargin(new Decimal(100), new Decimal(100))
     expect(result.equals(new Decimal(0))).toBe(true)
   })
 
-  it('calculates 50% margin when costPrice is half of unitPrice', () => {
+  it('calculates 50% margin when acquisitionPrice is half of unitPrice', () => {
     const result = calculateMargin(new Decimal(200), new Decimal(100))
     expect(result.equals(new Decimal(50))).toBe(true)
   })

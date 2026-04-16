@@ -20,11 +20,11 @@ describe('formatPercent', () => {
 })
 
 describe('calculateWithTVA', () => {
-  it('calculates 19% TVA on 100', () => {
+  it('calculates 21% TVA on 100', () => {
     const r = calculateWithTVA(100)
     expect(r.net).toBe(100)
-    expect(r.tva).toBe(19)
-    expect(r.total).toBe(119)
+    expect(r.tva).toBe(21)
+    expect(r.total).toBe(121)
   })
 })
 

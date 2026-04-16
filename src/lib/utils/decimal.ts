@@ -2,10 +2,10 @@ import { Decimal } from '@prisma/client/runtime/library'
 
 /**
  * Calculates profit margin percentage.
- * Formula: ((unitPrice - costPrice) / unitPrice) × 100
+ * Formula: ((unitPrice - acquisitionPrice) / unitPrice) × 100
  */
-export function calculateMargin(unitPrice: Decimal, costPrice: Decimal): Decimal {
-  return unitPrice.minus(costPrice).dividedBy(unitPrice).times(100)
+export function calculateMargin(unitPrice: Decimal, acquisitionPrice: Decimal): Decimal {
+  return unitPrice.minus(acquisitionPrice).dividedBy(unitPrice).times(100)
 }
 
 /**

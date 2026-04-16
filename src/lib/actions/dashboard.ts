@@ -1,8 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { Decimal } from '@prisma/client/runtime/library'
-import { compareDecimalStrs, serialize } from '@/lib/utils/decimal'
+import { serialize } from '@/lib/utils/decimal'
 
 interface DashboardKPIs {
   totalRevenue: string
@@ -22,7 +21,7 @@ interface TopClient {
 interface SlowMover {
   productId: string
   name: string
-  category: string
+  category: string | null
   salesVelocity: number
   stockQty: number
 }
@@ -48,39 +47,61 @@ export async function getDashboardData(): Promise<DashboardData> {
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999)
 
-  const ZERO = new Decimal(0)
-
   const [
-    currentMonthOrders,
-    lastMonthOrders,
+    currentMonthAgg,
+    currentMonthCount,
+    lastMonthAgg,
+    lastMonthCount,
     activeClients,
-    unpaidOrders,
-    clientsWithOrders,
-    products,
+    outstandingAgg,
+    topClientsRaw,
+    slowMoversRaw,
     recentOrdersRaw,
   ] = await Promise.all([
-    prisma.order.findMany({
+    // Current month revenue (aggregate instead of loading all rows)
+    prisma.order.aggregate({
+      where: { orderDate: { gte: currentMonthStart } },
+      _sum: { totalAmount: true },
+    }),
+    prisma.order.count({
       where: { orderDate: { gte: currentMonthStart } },
     }),
-    prisma.order.findMany({
+    // Last month revenue
+    prisma.order.aggregate({
+      where: { orderDate: { gte: lastMonthStart, lte: lastMonthEnd } },
+      _sum: { totalAmount: true },
+    }),
+    prisma.order.count({
       where: { orderDate: { gte: lastMonthStart, lte: lastMonthEnd } },
     }),
+    // Active clients count
     prisma.client.count({ where: { isActive: true } }),
-    prisma.order.findMany({ where: { isPaid: false } }),
-    prisma.client.findMany({
-      where: { isActive: true },
-      include: {
-        orders: { where: { orderDate: { gte: currentMonthStart } } },
-      },
+    // Outstanding payments (aggregate instead of loading all unpaid orders)
+    prisma.order.aggregate({
+      where: { isPaid: false },
+      _sum: { totalAmount: true, paidAmount: true },
     }),
+    // Top 5 clients by revenue (use groupBy instead of loading all clients+orders)
+    prisma.order.groupBy({
+      by: ['clientId'],
+      _sum: { totalAmount: true },
+      orderBy: { _sum: { totalAmount: 'desc' } },
+      take: 5,
+    }),
+    // Slow movers: products with least order items (use groupBy + count)
     prisma.product.findMany({
       where: { isActive: true },
-      include: {
-        orderItems: {
-          include: { order: { select: { orderDate: true } } },
-        },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        stockQty: true,
+        _count: { select: { orderItems: true } },
       },
+      orderBy: { orderItems: { _count: 'asc' } },
+      take: 5,
     }),
+    // Recent orders (already efficient, just limit)
     prisma.order.findMany({
       orderBy: { orderDate: 'desc' },
       take: 10,
@@ -88,86 +109,45 @@ export async function getDashboardData(): Promise<DashboardData> {
     }),
   ])
 
-  const totalRevenue = currentMonthOrders.reduce(
-    (sum, o) => sum.plus(o.totalAmount),
-    ZERO
-  )
-  const orderCount = currentMonthOrders.length
+  const totalRevenue = Number(currentMonthAgg._sum.totalAmount ?? 0)
+  const lastMonthRevenue = Number(lastMonthAgg._sum.totalAmount ?? 0)
+  const outstandingTotal = Number(outstandingAgg._sum.totalAmount ?? 0)
+  const outstandingPaid = Number(outstandingAgg._sum.paidAmount ?? 0)
 
-  const lastMonthRevenue = lastMonthOrders.reduce(
-    (sum, o) => sum.plus(o.totalAmount),
-    ZERO
-  )
-  const lastMonthOrderCount = lastMonthOrders.length
-
-  const outstandingPayments = unpaidOrders.reduce(
-    (sum, o) => sum.plus(new Decimal(o.totalAmount.toString()).minus(new Decimal(o.paidAmount.toString()))),
-    ZERO
-  )
-
-  const revenueChange = lastMonthRevenue.equals(ZERO)
+  const revenueChange = lastMonthRevenue === 0
     ? null
-    : Number(
-        totalRevenue
-          .minus(lastMonthRevenue)
-          .dividedBy(lastMonthRevenue)
-          .times(100)
-          .toFixed(1)
-      )
+    : Math.round(((totalRevenue - lastMonthRevenue) / lastMonthRevenue) * 1000) / 10
 
-  const orderCountChange =
-    lastMonthOrderCount === 0
-      ? null
-      : Math.round(
-          ((orderCount - lastMonthOrderCount) / lastMonthOrderCount) * 100
-        )
+  const orderCountChange = lastMonthCount === 0
+    ? null
+    : Math.round(((currentMonthCount - lastMonthCount) / lastMonthCount) * 100)
 
-  const topClients: TopClient[] = clientsWithOrders
-    .map((client) => ({
-      clientId: client.id,
-      companyName: client.companyName,
-      revenue: client.orders
-        .reduce((sum, o) => sum.plus(o.totalAmount), ZERO)
-        .toFixed(2),
-    }))
-    .filter((c) => compareDecimalStrs(c.revenue, '0') > 0)
-    .sort((a, b) => compareDecimalStrs(b.revenue, a.revenue))
-    .slice(0, 5)
+  // Fetch client names for top clients
+  const topClientIds = topClientsRaw.map((r) => r.clientId)
+  const clientNames = topClientIds.length > 0
+    ? await prisma.client.findMany({
+        where: { id: { in: topClientIds } },
+        select: { id: true, companyName: true },
+      })
+    : []
+  const nameMap = new Map(clientNames.map((c) => [c.id, c.companyName]))
 
-  const twelveMonthsAgo = new Date(
-    now.getFullYear(),
-    now.getMonth() - 12,
-    now.getDate()
-  )
-  const daysDiff = Math.max(
-    1,
-    Math.round(
-      (now.getTime() - twelveMonthsAgo.getTime()) / (1000 * 60 * 60 * 24)
-    )
-  )
-  const monthsInRange = Math.max(1, daysDiff / 30)
+  const topClients: TopClient[] = topClientsRaw.map((r) => ({
+    clientId: r.clientId,
+    companyName: nameMap.get(r.clientId) ?? 'Necunoscut',
+    revenue: (Number(r._sum.totalAmount) || 0).toFixed(2),
+  }))
 
-  const slowMovers: SlowMover[] = products
-    .map((product) => {
-      const totalUnitsSold = product.orderItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      )
-      const salesVelocity =
-        totalUnitsSold === 0
-          ? 0
-          : Math.round((totalUnitsSold / monthsInRange) * 100) / 100
+  const now12mo = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate())
+  const monthsInRange = Math.max(1, Math.round((now.getTime() - now12mo.getTime()) / (1000 * 60 * 60 * 24)) / 30)
 
-      return {
-        productId: product.id,
-        name: product.name,
-        category: product.category,
-        salesVelocity,
-        stockQty: product.stockQty,
-      }
-    })
-    .sort((a, b) => a.salesVelocity - b.salesVelocity)
-    .slice(0, 5)
+  const slowMovers: SlowMover[] = slowMoversRaw.map((p) => ({
+    productId: p.id,
+    name: p.name,
+    category: p.category,
+    salesVelocity: Math.round((p._count.orderItems / monthsInRange) * 100) / 100,
+    stockQty: p.stockQty,
+  }))
 
   const recentOrders: RecentOrder[] = recentOrdersRaw.map((o) => ({
     id: o.id,
@@ -180,9 +160,9 @@ export async function getDashboardData(): Promise<DashboardData> {
   return serialize({
     kpis: {
       totalRevenue: totalRevenue.toFixed(2),
-      orderCount,
+      orderCount: currentMonthCount,
       activeClients,
-      outstandingPayments: outstandingPayments.toFixed(2),
+      outstandingPayments: (outstandingTotal - outstandingPaid).toFixed(2),
       revenueChange,
       orderCountChange,
     },

@@ -6,7 +6,7 @@ import { formatCurrency } from '@/lib/utils/format'
 
 interface OfferItemRowProps {
   name: string
-  category: string
+  category: string | null
   quantity: number
   effectivePrice: string
   role: 'anchor' | 'upsell'

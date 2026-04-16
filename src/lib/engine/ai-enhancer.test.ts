@@ -32,7 +32,7 @@ function makeProduct(overrides: Partial<ScoredProduct>): ScoredProduct {
     sku: overrides.sku ?? `SKU-${productId}`,
     unitPrice: overrides.unitPrice ?? d(100),
     effectivePrice: overrides.effectivePrice ?? d(90),
-    costPrice: overrides.costPrice ?? d(50),
+    acquisitionPrice: overrides.acquisitionPrice ?? d(50),
     marginPercent: overrides.marginPercent ?? d(40),
     compositeScore: overrides.compositeScore ?? 0.8,
     scoreBreakdown: {

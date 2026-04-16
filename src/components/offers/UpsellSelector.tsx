@@ -12,7 +12,7 @@ interface UpsellProduct {
   id: string
   name: string
   sku: string
-  category: string
+  category: string | null
   unitPrice: string
 }
 

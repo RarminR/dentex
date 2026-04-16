@@ -5,6 +5,7 @@ export const RO = {
     products: 'Produse',
     orders: 'Comenzi',
     reports: 'Rapoarte',
+    lookup: 'Căutare Clienți',
     settings: 'Setări',
   },
   common: {
@@ -91,7 +92,7 @@ export const RO = {
     rowTotal: 'Total Rând',
     markPayment: 'Marchează Plata',
     confirm: 'Confirmă Comanda',
-    tva: 'TVA 19%',
+    tva: 'TVA 21%',
     totalWithTva: 'Total cu TVA',
   },
   offers: {

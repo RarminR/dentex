@@ -26,12 +26,12 @@ export function formatPercent(value: number | string): string {
 
 export function calculateWithTVA(amount: number | string): { net: number; tva: number; total: number } {
   const net = Number(amount)
-  const tva = Math.round(net * 0.19 * 100) / 100
+  const tva = Math.round(net * 0.21 * 100) / 100
   const total = Math.round((net + tva) * 100) / 100
   return { net, tva, total }
 }
 
 export function formatTVADisplay(amount: number | string): string {
   const { net, tva, total } = calculateWithTVA(amount)
-  return `${formatCurrency(net)} + TVA 19%: ${formatCurrency(tva)} = ${formatCurrency(total)}`
+  return `${formatCurrency(net)} + TVA 21%: ${formatCurrency(tva)} = ${formatCurrency(total)}`
 }

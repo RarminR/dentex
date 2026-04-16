@@ -19,27 +19,31 @@ model User {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  sku         String      @unique
-  category    String
-  role        String      @default("ANCHOR")
-  description String?
-  unitPrice   Decimal
-  costPrice   Decimal
-  stockQty    Int         @default(0)
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  id               String      @id @default(cuid())
+  name             String
+  sku              String      @unique
+  category         String?
+  role             String      @default("ANCHOR")
+  description      String?
+  unitPrice        Decimal
+  tvaPrice         Decimal     @default(0)
+  brutPrice        Decimal     @default(0)
+  acquisitionPrice Decimal     @default(0)
+  costPrice        Decimal?
+  stockQty         Int         @default(0)
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  orderItems       OrderItem[]
 
   @@index([category])
+  @@index([isActive])
 }
 
 model Client {
   id               String   @id @default(cuid())
   companyName      String
-  contactPerson    String
+  contactPerson    String?
   email            String?
   phone            String?
   address          String?
@@ -55,15 +59,17 @@ model Client {
   offers           Offer[]
 
   @@index([city])
+  @@index([isActive])
 }
 
 model Order {
   id          String      @id @default(cuid())
+  invoiceSku  String?     @unique
   clientId    String
   client      Client      @relation(fields: [clientId], references: [id])
   orderDate   DateTime
   totalAmount Decimal
-  status      String      @default("PENDING")
+  status      String      @default("DELIVERED")
   paidAmount  Decimal     @default(0)
   isPaid      Boolean     @default(false)
   notes       String?
@@ -72,6 +78,8 @@ model Order {
 
   @@index([clientId])
   @@index([orderDate])
+  @@index([status])
+  @@index([isPaid])
 }
 
 model OrderItem {

@@ -30,7 +30,9 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
             role: product.role,
             description: product.description,
             unitPrice: product.unitPrice.toString(),
-            costPrice: product.costPrice.toString(),
+            tvaPrice: product.tvaPrice.toString(),
+            brutPrice: product.brutPrice.toString(),
+            acquisitionPrice: product.acquisitionPrice.toString(),
             stockQty: product.stockQty,
           }}
         />

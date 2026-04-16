@@ -23,7 +23,7 @@ export interface ClientListResult {
 export interface ClientRow {
   id: string
   companyName: string
-  contactPerson: string
+  contactPerson: string | null
   city: string | null
   discountPercent: Prisma.Decimal
   isActive: boolean
@@ -108,7 +108,7 @@ export async function getClientFinancials(id: string): Promise<ClientFinancials>
       select: {
         quantity: true,
         totalPrice: true,
-        product: { select: { costPrice: true } },
+        product: { select: { acquisitionPrice: true, unitPrice: true } },
       },
     }),
   ])
@@ -124,7 +124,12 @@ export async function getClientFinancials(id: string): Promise<ClientFinancials>
   let totalCost = zero
   for (const item of items) {
     totalRevenue = totalRevenue.add(item.totalPrice)
-    totalCost = totalCost.add(item.product.costPrice.mul(item.quantity))
+    // Use the product's cost ratio (acquisitionPrice/unitPrice) applied to actual revenue
+    // This avoids mismatches between catalog prices and actual invoice prices
+    const costRatio = item.product.unitPrice.gt(zero)
+      ? item.product.acquisitionPrice.div(item.product.unitPrice)
+      : zero
+    totalCost = totalCost.add(item.totalPrice.mul(costRatio))
   }
 
   const profitabilityMargin = totalRevenue.gt(zero)
@@ -147,11 +152,12 @@ export async function createClient(data: unknown): Promise<ActionResult> {
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Date invalide' }
   }
 
-  const { email, phone, address, city, notes, ...rest } = parsed.data
+  const { email, phone, address, city, notes, contactPerson, ...rest } = parsed.data
 
   const client = await prisma.client.create({
     data: {
       ...rest,
+      contactPerson: contactPerson || null,
       email: email || null,
       phone: phone || null,
       address: address || null,

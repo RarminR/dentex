@@ -17,11 +17,13 @@ interface ProductFormProps {
     id: string
     name: string
     sku: string
-    category: string
+    category: string | null
     role: string
     description: string | null
     unitPrice: string
-    costPrice: string
+    tvaPrice: string
+    brutPrice: string
+    acquisitionPrice: string
     stockQty: number
   }
 }
@@ -42,12 +44,14 @@ export function ProductForm({ product }: ProductFormProps) {
     const input: ProductCreateInput = {
       name: formData.get('name') as string,
       sku: formData.get('sku') as string,
-      category: formData.get('category') as ProductCreateInput['category'],
+      category: (formData.get('category') as string) || null,
       role: (formData.get('role') as ProductCreateInput['role']) ?? 'ANCHOR',
       description: (formData.get('description') as string) || null,
       unitPrice: formData.get('unitPrice') as string,
-      costPrice: formData.get('costPrice') as string,
-      stockQty: Number(formData.get('stockQty')),
+      tvaPrice: (formData.get('tvaPrice') as string) || undefined,
+      brutPrice: (formData.get('brutPrice') as string) || undefined,
+      acquisitionPrice: (formData.get('acquisitionPrice') as string) || undefined,
+      stockQty: Number(formData.get('stockQty') ?? 0),
     }
 
     const result = isEditing
@@ -80,17 +84,8 @@ export function ProductForm({ product }: ProductFormProps) {
               <Input name="sku" defaultValue={product?.sku ?? ''} />
             </FormField>
 
-            <FormField label={RO.products.category} error={errors.category} required>
-              <Select name="category" defaultValue={product?.category ?? ''}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={RO.products.category} />
-                </SelectTrigger>
-                <SelectContent>
-                  {RO.products.categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <FormField label={RO.products.category} error={errors.category}>
+              <Input name="category" defaultValue={product?.category ?? ''} placeholder="Categorie (opțional)" />
             </FormField>
 
             <FormField label="Rol Ofertă" error={errors.role} required>
@@ -113,8 +108,16 @@ export function ProductForm({ product }: ProductFormProps) {
               <Input name="unitPrice" type="number" min={0} step="0.01" defaultValue={product?.unitPrice ?? ''} />
             </FormField>
 
-            <FormField label={RO.products.costPrice} error={errors.costPrice} required>
-              <Input name="costPrice" type="number" min={0} step="0.01" defaultValue={product?.costPrice ?? ''} />
+            <FormField label="TVA" error={errors.tvaPrice}>
+              <Input name="tvaPrice" type="number" min={0} step="0.01" defaultValue={product?.tvaPrice ?? ''} />
+            </FormField>
+
+            <FormField label="Preț Brut (cu TVA)" error={errors.brutPrice}>
+              <Input name="brutPrice" type="number" min={0} step="0.01" defaultValue={product?.brutPrice ?? ''} />
+            </FormField>
+
+            <FormField label={RO.products.costPrice} error={errors.acquisitionPrice}>
+              <Input name="acquisitionPrice" type="number" min={0} step="0.01" defaultValue={product?.acquisitionPrice ?? ''} />
             </FormField>
           </div>
 

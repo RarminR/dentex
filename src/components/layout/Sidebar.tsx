@@ -12,6 +12,7 @@ const navItems = [
   { href: '/products', label: RO.nav.products, icon: '📦' },
   { href: '/orders', label: RO.nav.orders, icon: '📋' },
   { href: '/reports', label: RO.nav.reports, icon: '📈' },
+  { href: '/lookup', label: RO.nav.lookup, icon: '🔍' },
   { href: '/settings', label: RO.nav.settings, icon: '⚙️' },
 ]
 

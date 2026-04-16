@@ -8,10 +8,14 @@ export function createMockProduct(overrides: Partial<{
   id: string
   name: string
   sku: string
-  category: string
+  category: string | null
   description: string | null
   unitPrice: Prisma.Decimal
+  tvaPrice: Prisma.Decimal
+  brutPrice: Prisma.Decimal
+  acquisitionPrice: Prisma.Decimal
   costPrice: Prisma.Decimal
+  role: string
   stockQty: number
   isActive: boolean
   createdAt: Date
@@ -21,11 +25,15 @@ export function createMockProduct(overrides: Partial<{
     id: overrides.id ?? 'product-1',
     name: overrides.name ?? 'Compozit Test',
     sku: overrides.sku ?? 'TEST-001',
-    category: overrides.category ?? 'Materiale Compozite',
+    category: overrides.category ?? null,
     description: overrides.description ?? null,
     unitPrice: overrides.unitPrice ?? d('150.00'),
-    costPrice: overrides.costPrice ?? d('90.00'),
-    stockQty: overrides.stockQty ?? 100,
+    tvaPrice: overrides.tvaPrice ?? d('28.50'),
+    brutPrice: overrides.brutPrice ?? d('178.50'),
+    acquisitionPrice: overrides.acquisitionPrice ?? overrides.costPrice ?? d('90.00'),
+    costPrice: overrides.costPrice ?? null,
+    role: overrides.role ?? 'ANCHOR',
+    stockQty: overrides.stockQty ?? 0,
     isActive: overrides.isActive ?? true,
     createdAt: overrides.createdAt ?? new Date('2025-01-01'),
     updatedAt: overrides.updatedAt ?? new Date('2025-01-01'),
@@ -52,7 +60,7 @@ export function createMockClient(overrides: Partial<{
   return {
     id: overrides.id ?? 'client-1',
     companyName: overrides.companyName ?? 'Clinica Test SRL',
-    contactPerson: overrides.contactPerson ?? 'Dr. Test',
+    contactPerson: overrides.contactPerson ?? null,
     email: overrides.email ?? 'test@clinica.ro',
     phone: overrides.phone ?? null,
     address: overrides.address ?? null,

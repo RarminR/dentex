@@ -61,7 +61,7 @@ function makeScoredProduct(overrides: Partial<{
     sku: 'SKU-001',
     unitPrice: d('100.00'),
     effectivePrice: overrides.effectivePrice ?? d('90.00'),
-    costPrice: d('60.00'),
+    acquisitionPrice: d('60.00'),
     marginPercent: overrides.marginPercent ?? d('40.00'),
     compositeScore: 0.85,
     scoreBreakdown: {

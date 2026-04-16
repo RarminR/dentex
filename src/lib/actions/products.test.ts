@@ -119,7 +119,7 @@ describe('getProduct', () => {
     expect(result!.name).toBe(product.name)
     expect(result!.sku).toBe(product.sku)
     expect(String(result!.unitPrice)).toBe(String(product.unitPrice))
-    expect(String(result!.costPrice)).toBe(String(product.costPrice))
+    expect(String(result!.acquisitionPrice)).toBe(String(product.acquisitionPrice))
     expect(mockPrisma.product.findUnique).toHaveBeenCalledWith({
       where: { id: 'product-1' },
     })
@@ -144,7 +144,7 @@ describe('createProduct', () => {
       sku: 'TEST-001',
       category: 'Materiale Compozite',
       unitPrice: '150.00',
-      costPrice: '90.00',
+      acquisitionPrice: '90.00',
       stockQty: 100,
     })
 
@@ -156,7 +156,7 @@ describe('createProduct', () => {
         sku: 'TEST-001',
         category: 'Materiale Compozite',
         unitPrice: expect.any(Prisma.Decimal),
-        costPrice: expect.any(Prisma.Decimal),
+        acquisitionPrice: expect.any(Prisma.Decimal),
         stockQty: 100,
       }),
     })
@@ -168,7 +168,7 @@ describe('createProduct', () => {
       sku: 'TEST-001',
       category: 'Materiale Compozite',
       unitPrice: '150.00',
-      costPrice: '90.00',
+      acquisitionPrice: '90.00',
       stockQty: 100,
     })
 
@@ -177,18 +177,19 @@ describe('createProduct', () => {
     expect(mockPrisma.product.create).not.toHaveBeenCalled()
   })
 
-  it('rejects invalid category', async () => {
+  it('accepts any category string', async () => {
+    const product = createMockProduct()
+    mockPrisma.product.create.mockResolvedValue(product)
+
     const result = await createProduct({
       name: 'Test',
       sku: 'TEST-001',
-      category: 'InvalidCategory' as any,
+      category: 'CustomCategory',
       unitPrice: '150.00',
-      costPrice: '90.00',
       stockQty: 100,
     })
 
-    expect(result.success).toBe(false)
-    expect(result.errors).toBeDefined()
+    expect(result.success).toBe(true)
   })
 
   it('rejects negative price', async () => {
@@ -197,7 +198,7 @@ describe('createProduct', () => {
       sku: 'TEST-001',
       category: 'Materiale Compozite',
       unitPrice: '-10',
-      costPrice: '90.00',
+      acquisitionPrice: '90.00',
       stockQty: 100,
     })
 
@@ -211,7 +212,7 @@ describe('createProduct', () => {
       sku: 'TEST-001',
       category: 'Materiale Compozite',
       unitPrice: '150.00',
-      costPrice: '90.00',
+      acquisitionPrice: '90.00',
       stockQty: -5,
     })
 
@@ -233,7 +234,7 @@ describe('createProduct', () => {
       sku: 'DUPLICATE',
       category: 'Materiale Compozite',
       unitPrice: '150.00',
-      costPrice: '90.00',
+      acquisitionPrice: '90.00',
       stockQty: 100,
     })
 

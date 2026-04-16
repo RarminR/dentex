@@ -23,8 +23,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [loading, setLoading] = useState(false)
 
   const unitPrice = Number(product.unitPrice.toString())
-  const costPrice = Number(product.costPrice.toString())
-  const margin = unitPrice > 0 ? ((unitPrice - costPrice) / unitPrice) * 100 : 0
+  const acquisitionPrice = Number(product.acquisitionPrice.toString())
+  const margin = unitPrice > 0 ? ((unitPrice - acquisitionPrice) / unitPrice) * 100 : 0
 
   async function handleDeactivate() {
     setLoading(true)
@@ -57,7 +57,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCard label={RO.products.sellPrice} value={formatCurrency(unitPrice)} />
-        <StatCard label={RO.products.costPrice} value={formatCurrency(costPrice)} />
+        <StatCard label={RO.products.costPrice} value={formatCurrency(acquisitionPrice)} />
         <StatCard
           label={RO.products.margin}
           value={formatPercent(margin)}
@@ -78,7 +78,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             </div>
             <div>
               <dt className="text-gray-500 font-medium">{RO.products.category}</dt>
-              <dd className="mt-1">{product.category}</dd>
+              <dd className="mt-1">{product.category ?? '—'}</dd>
             </div>
             <div>
               <dt className="text-gray-500 font-medium">Rol Ofertă</dt>

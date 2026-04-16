@@ -12,7 +12,7 @@ interface OfferDisplayProps {
   editedItems: Array<{
     productId: string
     name: string
-    category: string
+    category: string | null
     effectivePrice: string
     role: 'anchor' | 'upsell'
     suggestedQuantity: number
@@ -159,7 +159,7 @@ export function OfferDisplay({
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
-                +19% TVA
+                +21% TVA
               </Badge>
               {offer.isEdited && (
                 <Badge variant="secondary" className="text-xs">

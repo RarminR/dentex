@@ -39,11 +39,11 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ totalPrice: d('500.00') }),
-                product: createMockProduct({ costPrice: d('300.00') }),
+                product: createMockProduct({ acquisitionPrice: d('300.00') }),
               },
               {
                 ...createMockOrderItem({ id: 'item-2', totalPrice: d('300.00'), quantity: 3 }),
-                product: createMockProduct({ id: 'prod-2', costPrice: d('50.00') }),
+                product: createMockProduct({ id: 'prod-2', acquisitionPrice: d('50.00') }),
               },
             ],
           },
@@ -58,9 +58,9 @@ describe('getClientProfitability', () => {
     expect(result[0].totalRevenue).toBe('800.00')
   })
 
-  it('calculates totalCost as sum(quantity × product.costPrice)', async () => {
-    // Item 1: qty 10 × costPrice 300 = 3000
-    // Item 2: qty 3 × costPrice 50 = 150
+  it('calculates totalCost as sum(quantity × product.acquisitionPrice)', async () => {
+    // Item 1: qty 10 × acquisitionPrice 300 = 3000
+    // Item 2: qty 3 × acquisitionPrice 50 = 150
     // totalCost = 3150
     mockPrisma.client.findMany.mockResolvedValue([
       {
@@ -71,11 +71,11 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 10, totalPrice: d('1275.00') }),
-                product: createMockProduct({ costPrice: d('300.00') }),
+                product: createMockProduct({ acquisitionPrice: d('300.00') }),
               },
               {
                 ...createMockOrderItem({ id: 'item-2', quantity: 3, totalPrice: d('300.00') }),
-                product: createMockProduct({ id: 'prod-2', costPrice: d('50.00') }),
+                product: createMockProduct({ id: 'prod-2', acquisitionPrice: d('50.00') }),
               },
             ],
           },
@@ -100,7 +100,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 10, totalPrice: d('1000.00') }),
-                product: createMockProduct({ costPrice: d('60.00') }),
+                product: createMockProduct({ acquisitionPrice: d('60.00') }),
               },
             ],
           },
@@ -126,7 +126,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 10, totalPrice: d('1000.00') }),
-                product: createMockProduct({ costPrice: d('60.00') }),
+                product: createMockProduct({ acquisitionPrice: d('60.00') }),
               },
             ],
           },
@@ -168,7 +168,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 1, totalPrice: d('100.00') }),
-                product: createMockProduct({ costPrice: d('90.00') }),
+                product: createMockProduct({ acquisitionPrice: d('90.00') }),
               },
             ],
           },
@@ -182,7 +182,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 10, totalPrice: d('5000.00') }),
-                product: createMockProduct({ costPrice: d('100.00') }),
+                product: createMockProduct({ acquisitionPrice: d('100.00') }),
               },
             ],
           },
@@ -209,7 +209,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ totalPrice: d('100.00'), quantity: 1 }),
-                product: createMockProduct({ costPrice: d('50.00') }),
+                product: createMockProduct({ acquisitionPrice: d('50.00') }),
               },
             ],
           },
@@ -218,7 +218,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ totalPrice: d('200.00'), quantity: 2 }),
-                product: createMockProduct({ costPrice: d('50.00') }),
+                product: createMockProduct({ acquisitionPrice: d('50.00') }),
               },
             ],
           },
@@ -227,7 +227,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ totalPrice: d('300.00'), quantity: 3 }),
-                product: createMockProduct({ costPrice: d('50.00') }),
+                product: createMockProduct({ acquisitionPrice: d('50.00') }),
               },
             ],
           },
@@ -258,15 +258,15 @@ describe('getClientProfitability', () => {
     mockPrisma.client.findMany.mockResolvedValue([
       {
         ...createMockClient({ id: 'c1', companyName: 'A' }),
-        orders: [{ ...createMockOrder({ id: 'o1' }), items: [{ ...createMockOrderItem({ quantity: 10, totalPrice: d('5000.00') }), product: createMockProduct({ costPrice: d('100.00') }) }] }],
+        orders: [{ ...createMockOrder({ id: 'o1' }), items: [{ ...createMockOrderItem({ quantity: 10, totalPrice: d('5000.00') }), product: createMockProduct({ acquisitionPrice: d('100.00') }) }] }],
       },
       {
         ...createMockClient({ id: 'c2', companyName: 'B' }),
-        orders: [{ ...createMockOrder({ id: 'o2' }), items: [{ ...createMockOrderItem({ quantity: 5, totalPrice: d('2000.00') }), product: createMockProduct({ costPrice: d('100.00') }) }] }],
+        orders: [{ ...createMockOrder({ id: 'o2' }), items: [{ ...createMockOrderItem({ quantity: 5, totalPrice: d('2000.00') }), product: createMockProduct({ acquisitionPrice: d('100.00') }) }] }],
       },
       {
         ...createMockClient({ id: 'c3', companyName: 'C' }),
-        orders: [{ ...createMockOrder({ id: 'o3' }), items: [{ ...createMockOrderItem({ quantity: 1, totalPrice: d('100.00') }), product: createMockProduct({ costPrice: d('50.00') }) }] }],
+        orders: [{ ...createMockOrder({ id: 'o3' }), items: [{ ...createMockOrderItem({ quantity: 1, totalPrice: d('100.00') }), product: createMockProduct({ acquisitionPrice: d('50.00') }) }] }],
       },
     ])
 
@@ -288,7 +288,7 @@ describe('getClientProfitability', () => {
             items: [
               {
                 ...createMockOrderItem({ quantity: 1, totalPrice: d('0.30') }),
-                product: createMockProduct({ costPrice: d('0.10') }),
+                product: createMockProduct({ acquisitionPrice: d('0.10') }),
               },
             ],
           },

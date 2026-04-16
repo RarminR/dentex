@@ -21,7 +21,7 @@ export default async function NewOrderPage() {
             companyName: c.companyName,
             discountPercent: c.discountPercent,
           }))}
-          products={productsResult.data.map((p: { id: string; name: string; sku: string; category: string; unitPrice: { toString(): string } }) => ({
+          products={productsResult.data.map((p: { id: string; name: string; sku: string; category: string | null; unitPrice: { toString(): string } }) => ({
             id: p.id,
             name: p.name,
             sku: p.sku,

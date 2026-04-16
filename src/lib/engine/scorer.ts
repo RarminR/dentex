@@ -34,7 +34,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
         sku: true,
         role: true,
         unitPrice: true,
-        costPrice: true,
+        acquisitionPrice: true,
       },
     }),
     prisma.orderItem.findMany({
@@ -101,7 +101,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
 
     let margin = 0
     if (!product.unitPrice.equals(0)) {
-      margin = clamp01(product.unitPrice.minus(product.costPrice).dividedBy(product.unitPrice).toNumber())
+      margin = clamp01(product.unitPrice.minus(product.acquisitionPrice).dividedBy(product.unitPrice).toNumber())
     }
 
     let recency = 0
@@ -127,7 +127,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
 
     const marginPercent = product.unitPrice.equals(0)
       ? new Prisma.Decimal(0)
-      : product.unitPrice.minus(product.costPrice).dividedBy(product.unitPrice).times(100)
+      : product.unitPrice.minus(product.acquisitionPrice).dividedBy(product.unitPrice).times(100)
 
     return {
       productId: product.id,
@@ -136,7 +136,7 @@ export async function scoreProducts(clientId: string, config: EngineConfig): Pro
       sku: product.sku,
       unitPrice: product.unitPrice,
       effectivePrice: applyDiscount(product.unitPrice, client.discountPercent),
-      costPrice: product.costPrice,
+      acquisitionPrice: product.acquisitionPrice,
       marginPercent,
       compositeScore: clamp01(compositeScoreRaw),
       scoreBreakdown: {

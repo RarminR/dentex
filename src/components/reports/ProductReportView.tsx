@@ -13,7 +13,7 @@ type Tab = 'top' | 'slow'
 interface ProductPerformanceRow {
   productId: string
   productName: string
-  category: string
+  category: string | null
   totalUnitsSold: number
   uniqueClients: number
   totalRevenue: number
@@ -23,7 +23,7 @@ interface ProductPerformanceRow {
 interface SlowMoverRow {
   productId: string
   productName: string
-  category: string
+  category: string | null
   stockQty: number
   lastOrderDate: Date | null
   totalUnitsSold: number

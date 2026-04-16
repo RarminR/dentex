@@ -13,7 +13,7 @@ function makeProducts(count: number) {
     category: categories[i % categories.length],
     description: null,
     unitPrice: d(50 + Math.random() * 450),
-    costPrice: d(20 + Math.random() * 200),
+    acquisitionPrice: d(20 + Math.random() * 200),
     stockQty: 50 + Math.floor(Math.random() * 200),
     role: i < Math.round(count * 0.6) ? 'ANCHOR' : 'UPSELL',
     isActive: true,

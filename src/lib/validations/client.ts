@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const clientCreateSchema = z.object({
   companyName: z.string().min(2, 'Numele companiei trebuie să aibă cel puțin 2 caractere'),
-  contactPerson: z.string().min(2, 'Persoana de contact trebuie să aibă cel puțin 2 caractere'),
+  contactPerson: z.string().optional().or(z.literal('')),
   email: z.string().email('Email invalid').optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   address: z.string().optional().or(z.literal('')),

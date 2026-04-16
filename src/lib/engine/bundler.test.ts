@@ -16,7 +16,7 @@ function makeScoredProduct(overrides: Partial<ScoredProduct>): ScoredProduct {
     sku: overrides.sku ?? `${index}-SKU`,
     unitPrice: overrides.unitPrice ?? d('100'),
     effectivePrice: overrides.effectivePrice ?? d('90'),
-    costPrice: overrides.costPrice ?? d('60'),
+    acquisitionPrice: overrides.acquisitionPrice ?? d('60'),
     marginPercent: overrides.marginPercent ?? d('40'),
     compositeScore: overrides.compositeScore ?? 0.5,
     scoreBreakdown: {
@@ -151,7 +151,8 @@ describe('buildBundle', () => {
 
     const offer = buildBundle(scoredProducts, makeConfig(), 5)
     const countsByCategory = offer.items.reduce<Record<string, number>>((acc, item) => {
-      acc[item.category] = (acc[item.category] ?? 0) + 1
+      const cat = item.category ?? '_uncategorized'
+      acc[cat] = (acc[cat] ?? 0) + 1
       return acc
     }, {})
 

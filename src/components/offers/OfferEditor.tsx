@@ -11,11 +11,11 @@ import type { OfferView } from '@/lib/actions/offers'
 interface EditableItem {
   productId: string
   name: string
-  category: string
+  category: string | null
   sku: string
   unitPrice: string
   effectivePrice: string
-  costPrice: string
+  acquisitionPrice: string
   marginPercent: string
   compositeScore: number
   scoreBreakdown: {
@@ -51,7 +51,7 @@ export function OfferEditor({ initialOffer }: OfferEditorProps) {
       sku: item.sku,
       unitPrice: item.unitPrice.toString(),
       effectivePrice: item.effectivePrice.toString(),
-      costPrice: item.costPrice.toString(),
+      acquisitionPrice: item.acquisitionPrice.toString(),
       marginPercent: item.marginPercent.toString(),
       compositeScore: item.compositeScore,
       scoreBreakdown: item.scoreBreakdown,

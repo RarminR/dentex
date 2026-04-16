@@ -74,7 +74,7 @@ export function ClientForm({ initialData }: ClientFormProps) {
           />
         </FormField>
 
-        <FormField label={RO.clients.contact} required error={errors.contactPerson}>
+        <FormField label={RO.clients.contact} error={errors.contactPerson}>
           <Input
             value={formData.contactPerson}
             onChange={e => handleChange('contactPerson', e.target.value)}

@@ -66,7 +66,7 @@ export function ClientsListView({ initialData, cities }: ClientsListViewProps) {
     {
       key: 'contactPerson',
       header: RO.clients.contact,
-      cell: (row) => row.contactPerson,
+      cell: (row) => row.contactPerson ?? '—',
     },
     {
       key: 'city',

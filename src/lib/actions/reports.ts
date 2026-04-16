@@ -26,16 +26,6 @@ export async function getClientProfitability(
 ): Promise<ClientProfitabilityRow[]> {
   const { dateFrom, dateTo, limit } = params
 
-  type ClientWithOrders = Prisma.ClientGetPayload<{
-    include: {
-      orders: {
-        include: {
-          items: { include: { product: true } }
-        }
-      }
-    }
-  }>
-
   const orderWhere: Prisma.OrderWhereInput = {}
   if (dateFrom || dateTo) {
     orderWhere.orderDate = {}
@@ -43,49 +33,71 @@ export async function getClientProfitability(
     if (dateTo) (orderWhere.orderDate as Record<string, Date>).lte = dateTo
   }
 
-  const clients: ClientWithOrders[] = await prisma.client.findMany({
-    where: { isActive: true },
-    include: {
-      orders: {
-        where: orderWhere,
-        include: {
-          items: {
-            include: { product: true },
-          },
-        },
-      },
-    },
+  // Use groupBy for revenue per client instead of loading all data
+  const revenueByClient = await prisma.order.groupBy({
+    by: ['clientId'],
+    where: orderWhere,
+    _sum: { totalAmount: true },
+    _count: { id: true },
   })
 
+  if (revenueByClient.length === 0) return []
+
+  const clientIds = revenueByClient.map((r) => r.clientId)
+
+  // Fetch client names and cost data in parallel
+  const [clients, costData] = await Promise.all([
+    prisma.client.findMany({
+      where: { id: { in: clientIds } },
+      select: { id: true, companyName: true },
+    }),
+    // Get order items with product cost ratios for these clients
+    prisma.orderItem.findMany({
+      where: {
+        order: {
+          clientId: { in: clientIds },
+          ...orderWhere,
+        },
+      },
+      select: {
+        totalPrice: true,
+        order: { select: { clientId: true } },
+        product: { select: { unitPrice: true, acquisitionPrice: true } },
+      },
+    }),
+  ])
+
+  const nameMap = new Map(clients.map((c) => [c.id, c.companyName]))
+
+  // Calculate cost per client
+  const costByClient = new Map<string, Decimal>()
   const ZERO = new Decimal(0)
+  for (const item of costData) {
+    const clientId = item.order.clientId
+    const costRatio = item.product.unitPrice.equals(0)
+      ? ZERO
+      : item.product.acquisitionPrice.dividedBy(item.product.unitPrice)
+    const cost = item.totalPrice.times(costRatio)
+    costByClient.set(clientId, (costByClient.get(clientId) ?? ZERO).plus(cost))
+  }
+
   const HUNDRED = new Decimal(100)
-
-  const rows: ClientProfitabilityRow[] = clients.map((client) => {
-    let totalRevenue = ZERO
-    let totalCost = ZERO
-
-    for (const order of client.orders) {
-      for (const item of order.items) {
-        totalRevenue = totalRevenue.plus(item.totalPrice)
-        totalCost = totalCost.plus(
-          new Decimal(item.quantity).times(item.product.costPrice)
-        )
-      }
-    }
-
+  const rows: ClientProfitabilityRow[] = revenueByClient.map((r) => {
+    const totalRevenue = new Decimal(Number(r._sum.totalAmount ?? 0))
+    const totalCost = costByClient.get(r.clientId) ?? ZERO
     const profit = totalRevenue.minus(totalCost)
     const marginPercent = totalRevenue.equals(ZERO)
       ? ZERO
       : profit.dividedBy(totalRevenue).times(HUNDRED)
 
     return {
-      clientId: client.id,
-      clientName: client.companyName,
+      clientId: r.clientId,
+      clientName: nameMap.get(r.clientId) ?? 'Necunoscut',
       totalRevenue: totalRevenue.toFixed(2),
       totalCost: totalCost.toFixed(2),
       profit: profit.toFixed(2),
       marginPercent: marginPercent.toFixed(2),
-      orderCount: client.orders.length,
+      orderCount: r._count.id,
     }
   })
 
@@ -101,7 +113,7 @@ export async function getClientProfitability(
 interface ProductPerformanceRow {
   productId: string
   productName: string
-  category: string
+  category: string | null
   totalUnitsSold: number
   uniqueClients: number
   totalRevenue: number
@@ -111,7 +123,7 @@ interface ProductPerformanceRow {
 interface SlowMoverRow {
   productId: string
   productName: string
-  category: string
+  category: string | null
   stockQty: number
   lastOrderDate: Date | null
   totalUnitsSold: number
@@ -130,7 +142,7 @@ function buildProductPerformanceRows(
   products: Array<{
     id: string
     name: string
-    category: string
+    category: string | null
     stockQty: number
     orderItems: Array<{
       quantity: number
@@ -155,7 +167,7 @@ function buildProductPerformanceRows(
       }
     }
 
-    const salesVelocity = totalUnitsSold === 0
+    const salesVelocity = totalUnitsSold <= 0
       ? 0
       : Math.round((totalUnitsSold / monthsInRange) * 100) / 100
 
@@ -191,7 +203,9 @@ export async function getProductPerformance(params: {
     include: {
       orderItems: {
         where: orderItemWhere,
-        include: {
+        select: {
+          quantity: true,
+          totalPrice: true,
           order: { select: { clientId: true, orderDate: true } },
         },
       },
@@ -225,7 +239,9 @@ export async function getSlowMovers(params: {
     include: {
       orderItems: {
         where: orderItemWhere,
-        include: {
+        select: {
+          quantity: true,
+          totalPrice: true,
           order: { select: { clientId: true, orderDate: true } },
         },
       },

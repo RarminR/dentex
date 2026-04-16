@@ -76,12 +76,14 @@ export async function createProduct(input: ProductCreateInput): Promise<ActionRe
       data: {
         name: parsed.data.name,
         sku: parsed.data.sku,
-        category: parsed.data.category,
+        category: parsed.data.category ?? null,
         role: parsed.data.role ?? 'ANCHOR',
         description: parsed.data.description ?? null,
         unitPrice: new Prisma.Decimal(parsed.data.unitPrice),
-        costPrice: new Prisma.Decimal(parsed.data.costPrice),
-        stockQty: parsed.data.stockQty,
+        tvaPrice: parsed.data.tvaPrice ? new Prisma.Decimal(parsed.data.tvaPrice) : new Prisma.Decimal(0),
+        brutPrice: parsed.data.brutPrice ? new Prisma.Decimal(parsed.data.brutPrice) : new Prisma.Decimal(0),
+        acquisitionPrice: parsed.data.acquisitionPrice ? new Prisma.Decimal(parsed.data.acquisitionPrice) : new Prisma.Decimal(0),
+        stockQty: parsed.data.stockQty ?? 0,
       },
     })
 
@@ -112,11 +114,13 @@ export async function updateProduct(id: string, input: ProductUpdateInput): Prom
 
   if (parsed.data.name !== undefined) updateData.name = parsed.data.name
   if (parsed.data.sku !== undefined) updateData.sku = parsed.data.sku
-  if (parsed.data.category !== undefined) updateData.category = parsed.data.category
+  if (parsed.data.category !== undefined) updateData.category = parsed.data.category ?? null
   if (parsed.data.role !== undefined) updateData.role = parsed.data.role
   if (parsed.data.description !== undefined) updateData.description = parsed.data.description ?? null
   if (parsed.data.unitPrice !== undefined) updateData.unitPrice = new Prisma.Decimal(parsed.data.unitPrice)
-  if (parsed.data.costPrice !== undefined) updateData.costPrice = new Prisma.Decimal(parsed.data.costPrice)
+  if (parsed.data.tvaPrice !== undefined) updateData.tvaPrice = new Prisma.Decimal(parsed.data.tvaPrice!)
+  if (parsed.data.brutPrice !== undefined) updateData.brutPrice = new Prisma.Decimal(parsed.data.brutPrice!)
+  if (parsed.data.acquisitionPrice !== undefined) updateData.acquisitionPrice = new Prisma.Decimal(parsed.data.acquisitionPrice!)
   if (parsed.data.stockQty !== undefined) updateData.stockQty = parsed.data.stockQty
 
   try {

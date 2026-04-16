@@ -135,9 +135,9 @@ describe('scoreProducts', () => {
 
   it('returns scores in descending composite order with valid shape', async () => {
     const products = [
-      createMockProduct({ id: 'p-a', name: 'High', sku: 'A-001', unitPrice: d('200'), costPrice: d('80') }),
-      createMockProduct({ id: 'p-b', name: 'Mid', sku: 'B-001', unitPrice: d('120'), costPrice: d('72') }),
-      createMockProduct({ id: 'p-c', name: 'Low', sku: 'C-001', unitPrice: d('100'), costPrice: d('95') }),
+      createMockProduct({ id: 'p-a', name: 'High', sku: 'A-001', unitPrice: d('200'), acquisitionPrice: d('80') }),
+      createMockProduct({ id: 'p-b', name: 'Mid', sku: 'B-001', unitPrice: d('120'), acquisitionPrice: d('72') }),
+      createMockProduct({ id: 'p-c', name: 'Low', sku: 'C-001', unitPrice: d('100'), acquisitionPrice: d('95') }),
     ]
 
     mockPrisma.client.findUnique.mockResolvedValue(createMockClient({ id: 'client-1', discountPercent: d('10') }))

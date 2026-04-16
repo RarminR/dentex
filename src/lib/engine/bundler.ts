@@ -42,11 +42,12 @@ function selectWithCategoryCap(
   for (const product of products) {
     if (selected.length >= count) break
 
-    const currentCount = categoryCounts.get(product.category) ?? 0
+    const cat = product.category ?? '_uncategorized'
+    const currentCount = categoryCounts.get(cat) ?? 0
     if (currentCount + 1 > categoryLimit) continue
 
     selected.push(product)
-    categoryCounts.set(product.category, currentCount + 1)
+    categoryCounts.set(cat, currentCount + 1)
   }
 
   return selected

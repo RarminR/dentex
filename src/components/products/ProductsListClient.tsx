@@ -8,7 +8,6 @@ import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RO } from '@/lib/constants/ro'
 import { formatCurrency, formatPercent } from '@/lib/utils/format'
 import type { Product } from '@prisma/client'
@@ -22,11 +21,11 @@ interface ProductsListClientProps {
   category?: string
 }
 
-function computeMargin(unitPrice: string | number, costPrice: string | number): number {
+function computeMargin(unitPrice: string | number, acquisitionPrice: string | number): number {
   const up = Number(unitPrice)
-  const cp = Number(costPrice)
+  const ap = Number(acquisitionPrice)
   if (up === 0) return 0
-  return ((up - cp) / up) * 100
+  return ((up - ap) / up) * 100
 }
 
 export function ProductsListClient({
@@ -84,7 +83,7 @@ export function ProductsListClient({
     {
       key: 'category',
       header: RO.products.category,
-      cell: (row) => row.category,
+      cell: (row) => row.category ?? '—',
     },
     {
       key: 'role',
@@ -109,16 +108,16 @@ export function ProductsListClient({
       className: 'text-right',
     },
     {
-      key: 'costPrice',
+      key: 'acquisitionPrice',
       header: RO.products.costPrice,
-      cell: (row) => formatCurrency(row.costPrice.toString()),
+      cell: (row) => formatCurrency(row.acquisitionPrice.toString()),
       className: 'text-right',
     },
     {
       key: 'margin',
       header: RO.products.margin,
       cell: (row) => {
-        const margin = computeMargin(row.unitPrice.toString(), row.costPrice.toString())
+        const margin = computeMargin(row.unitPrice.toString(), row.acquisitionPrice.toString())
         return (
           <span className={margin < 20 ? 'text-red-600' : margin < 35 ? 'text-amber-600' : 'text-green-600'}>
             {formatPercent(margin)}
@@ -158,17 +157,12 @@ export function ProductsListClient({
             onChange={handleSearchChange}
             className="max-w-xs"
           />
-          <Select value={category || 'all'} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder={RO.products.category} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toate categoriile</SelectItem>
-              {RO.products.categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            placeholder="Filtru categorie..."
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value || 'all')}
+            className="max-w-[200px]"
+          />
         </div>
         <Link href="/products/new">
           <Button>{RO.products.add}</Button>
