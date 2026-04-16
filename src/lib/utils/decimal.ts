@@ -28,7 +28,7 @@ export function sumDecimals(values: Decimal[]): Decimal {
 // Recursively converts Prisma Decimal/Date to plain types for Server→Client serialization
 export function serialize<T>(obj: T): T {
   if (obj === null || obj === undefined) return obj
-  if (obj instanceof Decimal) return obj.toString() as unknown as T
+  if (Decimal.isDecimal(obj)) return (obj as Decimal).toString() as unknown as T
   if (obj instanceof Date) return obj.toISOString() as unknown as T
   if (Array.isArray(obj)) return obj.map(serialize) as unknown as T
   if (typeof obj === 'object') {
